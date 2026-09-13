@@ -1,0 +1,359 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  BUSINESS_OWNER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
+enum CardStatus {
+  UNASSIGNED
+  ACTIVE
+  INACTIVE
+}
+
+enum InteractionSource {
+  NFC
+  QR
+  UNKNOWN
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  phoneNumber  String?
+  passwordHash String?
+  role         UserRole   @default(BUSINESS_OWNER)
+  status       UserStatus @default(ACTIVE)
+
+  businesses Business[]
+  invitation AccountInvitation?
+  authSessions AuthSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model AccountInvitation {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  usedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
+model WeeklyReportDelivery {
+  id String @id @default(cuid())
+
+  businessId String
+  business   Business @relation(fields: [businessId],references: [id],onDelete: Cascade)
+
+  kind WeeklyReportDeliveryKind @default(WEEKLY)
+
+  /*
+   * For a normal weekly report this is the
+   * local calendar date, e.g.:
+   *
+   * 2026-09-14
+   *
+   * For a test:
+   *
+   * TEST-uuid
+   */
+  scheduleKey String
+
+  recipient String
+
+  status WeeklyReportDeliveryStatus @default(PENDING)
+
+  startedAt DateTime?
+  sentAt    DateTime?
+  failedAt  DateTime?
+
+  error String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, scheduleKey])
+  @@index([businessId, status])
+  @@index([createdAt])
+}
+
+model Business {
+  id      String  @id @default(cuid())
+  name    String
+  logoUrl String?
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+
+  weeklyReportEnabled    Boolean         @default(true)
+  weeklyReportDay        WeeklyReportDay @default(MONDAY)
+  weeklyReportTime       String          @default("09:00")
+  weeklyReportTimeZone   String          @default("UTC")
+  weeklyReportEmail      String?
+  weeklyReportLastSentAt DateTime?
+
+  weeklyReportDeliveries WeeklyReportDelivery[]
+
+  stores        Store[]
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Store {
+  id      String  @id @default(cuid())
+  name    String
+  address String?
+
+  googleReviewUrl String?
+  googlePlaceId   String?
+
+  googlePlaceConnectedFromUrl String?
+  googlePlaceConnectedAt      DateTime?
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  cards        Card[]
+  interactions Interaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([googlePlaceId])
+}
+
+model Card {
+  id String @id @default(cuid())
+
+  // This is the permanent public identifier printed/programmed on the card
+  code String @unique
+
+  // Example:
+  // "Cashier"
+  // "Table 1"
+  // "Entrance"
+  label String?
+
+  status CardStatus @default(UNASSIGNED)
+
+  // Nullable because you manufacture the card before selling it
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  interactions Interaction[]
+
+  assignedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([status])
+}
+
+model Interaction {
+  id String @id @default(cuid())
+
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id])
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  source InteractionSource @default(UNKNOWN)
+
+  userAgent String?
+
+  visitorHash String?
+  visitorKey String?
+
+  isReturning Boolean @default(false)
+  isDuplicate Boolean @default(false)
+
+  isBot Boolean @default(false)
+
+  deviceType InteractionDeviceType @default(UNKNOWN)
+
+  browser String?
+
+  operatingSystem String?
+
+  language String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([source, createdAt])
+  @@index([cardId, createdAt])
+  @@index([storeId, createdAt])
+  @@index([visitorKey, createdAt])
+  @@index([cardId, visitorKey, createdAt])
+  @@index([isDuplicate, isBot, createdAt])
+  @@index([visitorHash])
+}
+
+model Subscription {
+  id String @id @default(cuid())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+
+  plan   SubscriptionPlan
+  status SubscriptionStatus @default(TRIAL)
+
+  startsAt  DateTime  @default(now())
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([status])
+}
+
+model AuthSession {
+  id String @id
+
+  userId String
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+
+  refreshTokenHash String
+
+  expiresAt         DateTime
+  absoluteExpiresAt DateTime
+
+  revokedAt DateTime?
+
+  userAgent String?
+
+  lastUsedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+enum AccountRequestStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  CLOSED
+}
+
+enum InteractionDeviceType {
+  MOBILE
+  TABLET
+  DESKTOP
+  UNKNOWN
+}
+
+model AccountRequest {
+  id String @id @default(cuid())
+
+  ownerName String
+  phone     String
+  shopName  String
+
+  businessType String?
+
+  requestedCards Int
+
+  message String?
+
+  status AccountRequestStatus @default(NEW)
+
+  adminNote String?
+
+  handledById String?
+
+  contactedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([shopName])
+}
+
+enum WeeklyReportDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum WeeklyReportDeliveryStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum WeeklyReportDeliveryKind {
+  WEEKLY
+  TEST
+}

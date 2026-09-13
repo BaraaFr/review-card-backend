@@ -1,0 +1,65 @@
+{
+  "business": {
+    "id": "b1",
+    "name": "Business"
+  },
+  "generatedAt": "2026-09-13T12:00:00.000Z",
+  "period": {
+    "from": "Sep 6, 2026",
+    "to": "Sep 13, 2026",
+    "timeZone": "Asia/Beirut"
+  },
+  "overview": {
+    "interactions": 10,
+    "previousInteractions": 10,
+    "changePercentage": 0,
+    "uniqueVisitors": 2,
+    "nfc": 7,
+    "qr": 3,
+    "nfcPercentage": 70,
+    "qrPercentage": 30
+  },
+  "patterns": {
+    "peakDay": {
+      "weekday": "Saturday",
+      "interactions": 2
+    },
+    "peakTime": {
+      "startHour": 23,
+      "endHour": 1,
+      "interactions": 3,
+      "label": "11 PM – 1 AM"
+    }
+  },
+  "performance": {
+    "bestLocation": {
+      "id": "s1",
+      "name": "Main",
+      "interactions": 10,
+      "changePercentage": 100
+    },
+    "bestCard": {
+      "id": "c1",
+      "label": "Counter",
+      "code": "abcdef123",
+      "interactions": 10
+    }
+  },
+  "warnings": [
+    {
+      "type": "LOCATION",
+      "title": "Branch has stopped receiving engagement",
+      "description": "No meaningful interactions were recorded during the last 7 days."
+    },
+    {
+      "type": "CARD",
+      "title": "Card ghijkl needs attention",
+      "description": "This active card has had no meaningful activity during the last 7 days."
+    },
+    {
+      "type": "CARD",
+      "title": "Card mnopqr has no activity yet",
+      "description": "This active card has never recorded a meaningful customer interaction."
+    }
+  ]
+}

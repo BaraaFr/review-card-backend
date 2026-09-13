@@ -1,0 +1,30 @@
+{
+  "business": {
+    "id": "b1",
+    "name": "Business"
+  },
+  "period": {
+    "from": "Sep 6, 2026",
+    "to": "Sep 13, 2026",
+    "timeZone": "Asia/Beirut"
+  },
+  "overview": {
+    "interactions": 0,
+    "previousInteractions": 0,
+    "changePercentage": 0,
+    "uniqueVisitors": 0,
+    "nfc": 0,
+    "qr": 0,
+    "nfcPercentage": 0,
+    "qrPercentage": 0
+  },
+  "patterns": {
+    "peakDay": null,
+    "peakTime": null
+  },
+  "performance": {
+    "bestLocation": null,
+    "bestCard": null
+  },
+  "warnings": []
+}
