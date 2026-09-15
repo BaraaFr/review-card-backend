@@ -4575,6 +4575,568 @@ export async function getWeeklyReport(
   };
 }
 
+export async function getDataReport(
+  storeId: string,
+  range: ResolvedAnalyticsRange
+) {
+  /*
+   * =======================================================
+   * Store
+   * =======================================================
+   */
+
+  const store =
+    await prisma.store.findUnique({
+      where: {
+        id: storeId,
+      },
+
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+  if (!store) {
+    throw new Error(
+      "STORE_NOT_FOUND"
+    );
+  }
+
+  /*
+   * =======================================================
+   * Analytics data
+   * =======================================================
+   *
+   * Unlike getWeeklyReport(), this function receives
+   * the selected Analytics dashboard range.
+   */
+
+  const [
+    engagement,
+    patterns,
+    cardPerformance,
+    locationPerformance,
+    actionCenter,
+  ] =
+    await Promise.all([
+      getStoreEngagementSummary(
+        storeId,
+        range
+      ),
+
+      getStoreEngagementPatterns(
+        storeId,
+        range
+      ),
+
+      getStoreCardPerformance(
+        storeId,
+        range
+      ),
+
+      getLocationPerformance(
+        storeId,
+        range
+      ),
+
+      getActionCenter(
+        storeId,
+        range
+      ),
+    ]);
+
+  /*
+   * =======================================================
+   * Relevant warnings
+   * =======================================================
+   */
+
+  const relevantWarnings =
+    actionCenter.warnings.filter(
+      (item) => {
+        /*
+         * Location Performance is business-wide.
+         *
+         * The report itself belongs to the selected
+         * location, so don't show warnings belonging
+         * to another location.
+         */
+
+        if (
+          item.entityType ===
+          "LOCATION"
+        ) {
+          return (
+            item.entityId ===
+            storeId
+          );
+        }
+
+        return true;
+      }
+    );
+
+  /*
+   * =======================================================
+   * Attention
+   * =======================================================
+   */
+
+  const warningItems =
+    relevantWarnings.filter(
+      (item) =>
+        item.severity ===
+        "WARNING"
+    );
+
+  const attentionItems =
+    warningItems
+      .slice(
+        0,
+        3
+      )
+      .map(
+        (item) => ({
+          id:
+            item.id,
+
+          type:
+            item.type,
+
+          entityType:
+            item.entityType,
+
+          entityId:
+            item.entityId,
+
+          title:
+            item.title,
+
+          description:
+            item.description,
+
+          metric:
+            item.metric,
+        })
+      );
+
+  /*
+   * =======================================================
+   * Highlights
+   * =======================================================
+   */
+
+  const highlights =
+    actionCenter.highlights
+      .filter(
+        (item) =>
+          item.type !==
+          "ALL_HEALTHY"
+      )
+      .slice(
+        0,
+        3
+      )
+      .map(
+        (item) => ({
+          id:
+            item.id,
+
+          type:
+            item.type,
+
+          title:
+            item.title,
+
+          description:
+            item.description,
+
+          metric:
+            item.metric,
+        })
+      );
+
+  /*
+   * =======================================================
+   * Health
+   * =======================================================
+   */
+
+  const health:
+    WeeklyReportHealth =
+    warningItems.length >
+    0
+      ? "NEEDS_ATTENTION"
+      : "HEALTHY";
+
+  /*
+   * =======================================================
+   * Best card
+   * =======================================================
+   */
+
+  const bestCard =
+    cardPerformance
+      .summary
+      .bestCard
+      ? {
+          id:
+            cardPerformance
+              .summary
+              .bestCard
+              .id,
+
+          name:
+            cardPerformance
+              .summary
+              .bestCard
+              .label,
+
+          code:
+            cardPerformance
+              .summary
+              .bestCard
+              .code,
+
+          interactions:
+            cardPerformance
+              .summary
+              .bestCard
+              .meaningfulInteractions,
+
+          uniqueVisitors:
+            cardPerformance
+              .summary
+              .bestCard
+              .uniqueVisitors,
+        }
+      : null;
+
+  /*
+   * =======================================================
+   * Best location
+   * =======================================================
+   */
+
+  const bestLocation =
+    locationPerformance
+      .summary
+      .totalLocations >
+      1 &&
+    locationPerformance
+      .summary
+      .bestLocation
+      ? {
+          id:
+            locationPerformance
+              .summary
+              .bestLocation
+              .id,
+
+          name:
+            locationPerformance
+              .summary
+              .bestLocation
+              .name,
+
+          interactions:
+            locationPerformance
+              .summary
+              .bestLocation
+              .interactions,
+
+          uniqueVisitors:
+            locationPerformance
+              .summary
+              .bestLocation
+              .uniqueVisitors,
+
+          changePercentage:
+            locationPerformance
+              .summary
+              .bestLocation
+              .changePercentage,
+        }
+      : null;
+
+  /*
+   * =======================================================
+   * Final Data Report
+   * =======================================================
+   */
+
+  return {
+    generatedAt:
+      new Date(),
+
+    store: {
+      id:
+        store.id,
+
+      name:
+        store.name,
+    },
+
+    period: {
+      preset:
+        range.preset,
+
+      days:
+        range.days,
+
+      from:
+        range.from,
+
+      to:
+        range.to,
+
+      timeZone:
+        range.timeZone,
+
+      previousFrom:
+        range.previousFrom,
+
+      previousTo:
+        range.previousTo,
+    },
+
+    health,
+
+    /*
+     * =====================================================
+     * Overview
+     * =====================================================
+     */
+
+    overview: {
+      interactions: {
+        current:
+          engagement
+            .interactions
+            .current,
+
+        previous:
+          engagement
+            .interactions
+            .previous,
+
+        changePercentage:
+          engagement
+            .interactions
+            .changePercentage,
+      },
+
+      visitors: {
+        unique:
+          engagement
+            .visitors
+            .unique,
+
+        new:
+          engagement
+            .visitors
+            .new,
+
+        returning:
+          engagement
+            .visitors
+            .returning,
+
+        newPercentage:
+          engagement
+            .visitors
+            .newPercentage,
+
+        returningPercentage:
+          engagement
+            .visitors
+            .returningPercentage,
+      },
+
+      sources: {
+        nfc:
+          engagement
+            .sources
+            .nfc,
+
+        qr:
+          engagement
+            .sources
+            .qr,
+
+        unknown:
+          engagement
+            .sources
+            .unknown,
+
+        nfcPercentage:
+          engagement
+            .sources
+            .nfcPercentage,
+
+        qrPercentage:
+          engagement
+            .sources
+            .qrPercentage,
+
+        unknownPercentage:
+          engagement
+            .sources
+            .unknownPercentage,
+      },
+
+      devices: {
+        mobile:
+          engagement
+            .devices
+            .mobile,
+
+        tablet:
+          engagement
+            .devices
+            .tablet,
+
+        desktop:
+          engagement
+            .devices
+            .desktop,
+
+        unknown:
+          engagement
+            .devices
+            .unknown,
+
+        mobilePercentage:
+          engagement
+            .devices
+            .mobilePercentage,
+
+        tabletPercentage:
+          engagement
+            .devices
+            .tabletPercentage,
+
+        desktopPercentage:
+          engagement
+            .devices
+            .desktopPercentage,
+
+        unknownPercentage:
+          engagement
+            .devices
+            .unknownPercentage,
+      },
+    },
+
+    /*
+     * =====================================================
+     * Patterns
+     * =====================================================
+     */
+
+    patterns: {
+      averagePerDay:
+        patterns
+          .summary
+          .averagePerDay,
+
+      totalInteractions:
+        patterns
+          .summary
+          .totalInteractions,
+
+      totalUniqueVisitors:
+        patterns
+          .summary
+          .totalUniqueVisitors,
+
+      peakDay:
+        patterns
+          .summary
+          .peakDay,
+
+      peakTime:
+        patterns
+          .summary
+          .peakTime,
+    },
+
+    /*
+     * =====================================================
+     * Performance
+     * =====================================================
+     */
+
+    performance: {
+      bestCard,
+
+      bestLocation,
+
+      cards: {
+        total:
+          cardPerformance
+            .summary
+            .totalCards,
+
+        active:
+          cardPerformance
+            .summary
+            .activeCards,
+
+        withActivity:
+          cardPerformance
+            .summary
+            .cardsWithActivity,
+
+        needingAttention:
+          cardPerformance
+            .summary
+            .cardsNeedingAttention,
+      },
+
+      locations: {
+        total:
+          locationPerformance
+            .summary
+            .totalLocations,
+
+        withActivity:
+          locationPerformance
+            .summary
+            .locationsWithActivity,
+
+        needingAttention:
+          locationPerformance
+            .summary
+            .locationsNeedingAttention,
+      },
+    },
+
+    /*
+     * =====================================================
+     * Attention
+     * =====================================================
+     */
+
+    attention: {
+      total:
+        warningItems.length,
+
+      items:
+        attentionItems,
+    },
+
+    /*
+     * =====================================================
+     * Highlights
+     * =====================================================
+     */
+
+    highlights,
+  };
+}
+
 export async function getFilteredAnalyticsReport(
   storeId: string,
   range: ResolvedAnalyticsRange,

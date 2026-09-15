@@ -14,6 +14,7 @@ import adminOverviewRoutes from "../modules/admin/overview/overview.routes.js";
 import googleRoutes from "../modules/google/google.routes.js";
 import accountRequestRoutes from "../modules/account-requests/account-request.routes.js";
 import accountRoutes from "../modules/accounts/account.routes.js";
+import supportRoutes from "../modules/supports/support.routes.js";
 
 
 const router = Router();
@@ -81,5 +82,11 @@ router.use(
   "/account",
   accountRoutes
 );
+
+router.use(
+  "/support",
+  supportRoutes
+);
+
 
 export default router;

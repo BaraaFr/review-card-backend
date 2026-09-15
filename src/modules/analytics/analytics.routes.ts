@@ -11,7 +11,8 @@ import {
   getStoreEngagementPatternsController,
   downloadAnalyticsReportController,
   getLocationPerformanceController,
-  getWeeklyReportController
+  getWeeklyReportController,
+  getDataReportController
 } from "./analytics.controller.js";
 
 import {
@@ -103,6 +104,16 @@ router.get(
   ),
 
   getStoreEngagementPatternsController
+);
+
+router.get(
+  "/stores/:storeId/data-report",
+
+  requireFeatureAccess(
+    "ANALYTICS"
+  ),
+
+  getDataReportController
 );
 
 router.get(

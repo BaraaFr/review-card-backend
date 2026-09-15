@@ -27,6 +27,7 @@ export const authService = {
       where: { email: data.email.trim().toLowerCase() },
       select: { ...publicUserSelect, passwordHash: true },
     });
+    
     if (!user || !user.passwordHash) throw new AuthError("INVALID_CREDENTIALS");
     if (user.status === "DISABLED") throw new AuthError("ACCOUNT_DISABLED");
     if (user.status !== "ACTIVE") throw new AuthError("ACCOUNT_NOT_ACTIVE");

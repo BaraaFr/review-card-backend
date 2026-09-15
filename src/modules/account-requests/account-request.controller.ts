@@ -131,12 +131,11 @@ import type {
           });
       }
   
-      const result =
-        await getAdminAccountRequests(
+      const result = await getAdminAccountRequests(
           parsed.data
         );
-  
-      return res.json({
+
+        return res.json({
         success:
           true,
   
