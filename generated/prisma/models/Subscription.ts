@@ -31,6 +31,8 @@ export type SubscriptionMinAggregateOutputType = {
   status: $Enums.SubscriptionStatus | null
   startsAt: Date | null
   expiresAt: Date | null
+  expiryReminderFor: Date | null
+  expiryReminderSentAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +44,8 @@ export type SubscriptionMaxAggregateOutputType = {
   status: $Enums.SubscriptionStatus | null
   startsAt: Date | null
   expiresAt: Date | null
+  expiryReminderFor: Date | null
+  expiryReminderSentAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +57,8 @@ export type SubscriptionCountAggregateOutputType = {
   status: number
   startsAt: number
   expiresAt: number
+  expiryReminderFor: number
+  expiryReminderSentAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +72,8 @@ export type SubscriptionMinAggregateInputType = {
   status?: true
   startsAt?: true
   expiresAt?: true
+  expiryReminderFor?: true
+  expiryReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +85,8 @@ export type SubscriptionMaxAggregateInputType = {
   status?: true
   startsAt?: true
   expiresAt?: true
+  expiryReminderFor?: true
+  expiryReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +98,8 @@ export type SubscriptionCountAggregateInputType = {
   status?: true
   startsAt?: true
   expiresAt?: true
+  expiryReminderFor?: true
+  expiryReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +184,8 @@ export type SubscriptionGroupByOutputType = {
   status: $Enums.SubscriptionStatus
   startsAt: Date
   expiresAt: Date | null
+  expiryReminderFor: Date | null
+  expiryReminderSentAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: SubscriptionCountAggregateOutputType | null
@@ -204,6 +218,8 @@ export type SubscriptionWhereInput = {
   status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderFor?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderSentAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   business?: Prisma.XOR<Prisma.BusinessScalarRelationFilter, Prisma.BusinessWhereInput>
@@ -216,6 +232,8 @@ export type SubscriptionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiryReminderFor?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiryReminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   business?: Prisma.BusinessOrderByWithRelationInput
@@ -231,6 +249,8 @@ export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderFor?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderSentAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   business?: Prisma.XOR<Prisma.BusinessScalarRelationFilter, Prisma.BusinessWhereInput>
@@ -243,6 +263,8 @@ export type SubscriptionOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiryReminderFor?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiryReminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SubscriptionCountOrderByAggregateInput
@@ -260,6 +282,8 @@ export type SubscriptionScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumSubscriptionStatusWithAggregatesFilter<"Subscription"> | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+  expiryReminderFor?: Prisma.DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+  expiryReminderSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
 }
@@ -270,6 +294,8 @@ export type SubscriptionCreateInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   business: Prisma.BusinessCreateNestedOneWithoutSubscriptionsInput
@@ -282,6 +308,8 @@ export type SubscriptionUncheckedCreateInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -292,6 +320,8 @@ export type SubscriptionUpdateInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   business?: Prisma.BusinessUpdateOneRequiredWithoutSubscriptionsNestedInput
@@ -304,6 +334,8 @@ export type SubscriptionUncheckedUpdateInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -315,6 +347,8 @@ export type SubscriptionCreateManyInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -325,6 +359,8 @@ export type SubscriptionUpdateManyMutationInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -336,6 +372,8 @@ export type SubscriptionUncheckedUpdateManyInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +395,8 @@ export type SubscriptionCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiryReminderFor?: Prisma.SortOrder
+  expiryReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -368,6 +408,8 @@ export type SubscriptionMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiryReminderFor?: Prisma.SortOrder
+  expiryReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -379,6 +421,8 @@ export type SubscriptionMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiryReminderFor?: Prisma.SortOrder
+  expiryReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -439,6 +483,8 @@ export type SubscriptionCreateWithoutBusinessInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -449,6 +495,8 @@ export type SubscriptionUncheckedCreateWithoutBusinessInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -489,6 +537,8 @@ export type SubscriptionScalarWhereInput = {
   status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderFor?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  expiryReminderSentAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
 }
@@ -499,6 +549,8 @@ export type SubscriptionCreateManyBusinessInput = {
   status?: $Enums.SubscriptionStatus
   startsAt?: Date | string
   expiresAt?: Date | string | null
+  expiryReminderFor?: Date | string | null
+  expiryReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -509,6 +561,8 @@ export type SubscriptionUpdateWithoutBusinessInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -519,6 +573,8 @@ export type SubscriptionUncheckedUpdateWithoutBusinessInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -529,6 +585,8 @@ export type SubscriptionUncheckedUpdateManyWithoutBusinessInput = {
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiryReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -542,6 +600,8 @@ export type SubscriptionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   status?: boolean
   startsAt?: boolean
   expiresAt?: boolean
+  expiryReminderFor?: boolean
+  expiryReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
@@ -554,6 +614,8 @@ export type SubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   startsAt?: boolean
   expiresAt?: boolean
+  expiryReminderFor?: boolean
+  expiryReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
@@ -566,6 +628,8 @@ export type SubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   startsAt?: boolean
   expiresAt?: boolean
+  expiryReminderFor?: boolean
+  expiryReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
@@ -578,11 +642,13 @@ export type SubscriptionSelectScalar = {
   status?: boolean
   startsAt?: boolean
   expiresAt?: boolean
+  expiryReminderFor?: boolean
+  expiryReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "plan" | "status" | "startsAt" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
+export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessId" | "plan" | "status" | "startsAt" | "expiresAt" | "expiryReminderFor" | "expiryReminderSentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
 export type SubscriptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   business?: boolean | Prisma.BusinessDefaultArgs<ExtArgs>
 }
@@ -605,6 +671,8 @@ export type $SubscriptionPayload<ExtArgs extends runtime.Types.Extensions.Intern
     status: $Enums.SubscriptionStatus
     startsAt: Date
     expiresAt: Date | null
+    expiryReminderFor: Date | null
+    expiryReminderSentAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["subscription"]>
@@ -1037,6 +1105,8 @@ export interface SubscriptionFieldRefs {
   readonly status: Prisma.FieldRef<"Subscription", 'SubscriptionStatus'>
   readonly startsAt: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"Subscription", 'DateTime'>
+  readonly expiryReminderFor: Prisma.FieldRef<"Subscription", 'DateTime'>
+  readonly expiryReminderSentAt: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Subscription", 'DateTime'>
 }

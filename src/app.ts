@@ -5,23 +5,15 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import routes from "./routes/index.js";
 import redirectRoutes from "./modules/redirect/redirect.routes.js";
-import {
-  startWeeklyReportScheduler,
-} from "./modules/weekly-reports/weekly-report.scheduler.js";
-
-import {
-  startWeeklyReportWorker,
-} from "./modules/weekly-reports/weekly-report.worker.js";
 import { queueDashboardAdapter } from "./modules/queues/queue-dashboard.js";
 import { authenticate } from "./middleware/auth.middleware.js";
 import { authorize } from "./middleware/role.middleware.js";
 import { errorHandler } from "./middleware/error.middleware.js";
+import { startBackgroundJobs } from "./modules/queues/background-jobs.js";
 
 const app = express();
 
-startWeeklyReportWorker();
-
-startWeeklyReportScheduler();
+startBackgroundJobs();
 
 app.use(
   cors({

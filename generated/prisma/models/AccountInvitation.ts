@@ -410,10 +410,6 @@ export type AccountInvitationUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccountInvitationUpdateToOneWithWhereWithoutUserInput, Prisma.AccountInvitationUpdateWithoutUserInput>, Prisma.AccountInvitationUncheckedUpdateWithoutUserInput>
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type AccountInvitationCreateWithoutUserInput = {
   id?: string
   tokenHash: string

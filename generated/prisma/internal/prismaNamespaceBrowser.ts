@@ -50,6 +50,7 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 export const ModelName = {
   User: 'User',
+  PasswordResetToken: 'PasswordResetToken',
   AccountInvitation: 'AccountInvitation',
   WeeklyReportDelivery: 'WeeklyReportDelivery',
   Business: 'Business',
@@ -90,6 +91,19 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const AccountInvitationScalarFieldEnum = {
@@ -200,6 +214,8 @@ export const SubscriptionScalarFieldEnum = {
   status: 'status',
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
+  expiryReminderFor: 'expiryReminderFor',
+  expiryReminderSentAt: 'expiryReminderSentAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

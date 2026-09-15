@@ -16,7 +16,8 @@ import {
   getStoreEngagementPatterns,
   getStoreEngagementSummary,
   getWeeklyReport,
-  getFilteredAnalyticsReport
+  getFilteredAnalyticsReport,
+  getDataReport
 } from "./analytics.service.js";
 import { AnalyticsRangeError, resolveAnalyticsRangeQuery } from "./utils/analytics-range.util.js";
 import { generateAnalyticsReportPdf } from "./utils/analytics-report.pdf.js";
@@ -635,6 +636,89 @@ export async function getLocationPerformanceController(
 
           message:
             "Store not found.",
+        });
+    }
+
+    return next(
+      error
+    );
+  }
+}
+
+export async function getDataReportController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const {
+      storeId,
+    } =
+      req.params;
+
+    if (!storeId) {
+      return res
+        .status(400)
+        .json({
+          success:
+            false,
+
+          message:
+            "Store ID is required.",
+        });
+    }
+
+    /*
+     * Uses the exact same range resolver
+     * as the rest of the Analytics page.
+     */
+    const range =
+      resolveAnalyticsRangeQuery(
+        req.query
+      );
+
+    const data =
+      await getDataReport(
+        storeId as string,
+        range
+      );
+
+    return res.json({
+      success:
+        true,
+
+      data,
+    });
+  } catch (error) {
+    if (
+      error instanceof
+        Error &&
+      error.message ===
+        "STORE_NOT_FOUND"
+    ) {
+      return res
+        .status(404)
+        .json({
+          success:
+            false,
+
+          message:
+            "Store not found.",
+        });
+    }
+
+    if (
+      error instanceof
+      AnalyticsRangeError
+    ) {
+      return res
+        .status(400)
+        .json({
+          success:
+            false,
+
+          message:
+            error.message,
         });
     }
 

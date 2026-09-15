@@ -19,6 +19,7 @@ import {
 import {
   recordInteraction,
 } from "../interactions/interaction-tracking.service.js";
+import { env } from "../../config/env.js";
 
 type InteractionSource =
   | "NFC"
@@ -195,10 +196,10 @@ export async function redirectCardController(
 
     if (
       error instanceof
-        Error
+      Error
     ) {
       switch (
-        error.message
+      error.message
       ) {
         case "CARD_NOT_FOUND":
           return res
@@ -220,6 +221,40 @@ export async function redirectCardController(
             .send(
               "This ValYou card is not currently assigned."
             );
+
+        case "SUBSCRIPTION_UNAVAILABLE": {
+              /*
+               * Do not allow browsers/proxies
+               * to cache this redirect.
+               *
+               * After the owner renews,
+               * the same card must work again
+               * immediately.
+               */
+              res.setHeader(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate, proxy-revalidate"
+              );
+    
+              res.setHeader(
+                "Pragma",
+                "no-cache"
+              );
+    
+              res.setHeader(
+                "Expires",
+                "0"
+              );
+    
+              /*
+               * Never expose billing information
+               * to the restaurant's customer.
+               */
+              return res.redirect(
+                302,
+                `${env.FRONTEND_URL}/review-unavailable`
+              );
+            }
 
         case "GOOGLE_REVIEW_URL_MISSING":
           return res

@@ -1,7 +1,10 @@
 import {
   Router,
 } from "express";
-import { loginRateLimit } from "./login-rate-limit.js";
+
+import {
+  loginRateLimit,
+} from "./login-rate-limit.js";
 
 import {
   authenticate,
@@ -18,12 +21,25 @@ import {
   refreshSessionController,
 } from "./auth-session.controller.js";
 
+import {
+  forgotPasswordController,
+  resetPasswordController,
+} from "./password-reset.controller.js";
+
+import {
+  forgotPasswordRateLimit,
+  resetPasswordRateLimit,
+} from "./password-reset-rate-limit.js";
+
 const router =
   Router();
 
 /*
+ * =========================================================
  * Public authentication routes
+ * =========================================================
  */
+
 router.post(
   "/login",
   loginRateLimit,
@@ -36,32 +52,55 @@ router.post(
 );
 
 /*
- * Refresh does NOT require
- * a valid access token.
+ * =========================================================
+ * Password recovery
+ * =========================================================
  */
+
+router.post(
+  "/forgot-password",
+  forgotPasswordRateLimit,
+  forgotPasswordController
+);
+
+router.post(
+  "/reset-password",
+  resetPasswordRateLimit,
+  resetPasswordController
+);
+
+/*
+ * =========================================================
+ * Session refresh
+ * =========================================================
+ *
+ * Refresh does NOT require a valid access token.
+ */
+
 router.post(
   "/refresh",
   refreshSessionController
 );
 
 /*
- * Logout also doesn't require
- * a valid access token.
+ * =========================================================
+ * Logout
+ * =========================================================
  *
- * The refresh cookie identifies
- * the current persistent session.
+ * The refresh cookie identifies the session.
  */
+
 router.post(
   "/logout",
   logoutController
 );
 
 /*
- * Requires valid access JWT.
- *
- * Frontend interceptor will refresh
- * automatically if it has expired.
+ * =========================================================
+ * Current user
+ * =========================================================
  */
+
 router.get(
   "/me",
   authenticate,
