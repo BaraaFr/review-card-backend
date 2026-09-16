@@ -156,6 +156,7 @@ model Business {
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
 
+  trialStartedAt DateTime?
 
   weeklyReportEnabled    Boolean         @default(true)
   weeklyReportDay        WeeklyReportDay @default(MONDAY)
@@ -173,6 +174,12 @@ model Business {
   updatedAt DateTime @updatedAt
 
   @@index([ownerId])
+}
+
+enum CardPaymentMethod {
+  CASH
+  WHISH
+  OTHER
 }
 
 model Store {
@@ -201,21 +208,18 @@ model Store {
 
 model Card {
   id String @id @default(cuid())
-
-  // This is the permanent public identifier printed/programmed on the card
   code String @unique
-
-  // Example:
-  // "Cashier"
-  // "Table 1"
-  // "Entrance"
   label String?
 
   status CardStatus @default(UNASSIGNED)
 
-  // Nullable because you manufacture the card before selling it
   storeId String?
   store   Store?  @relation(fields: [storeId], references: [id])
+
+  salePriceCents Int?
+  paidAt         DateTime?
+  paymentMethod  CardPaymentMethod?
+  deliveredAt    DateTime?
 
   interactions Interaction[]
 
@@ -226,6 +230,8 @@ model Card {
 
   @@index([storeId])
   @@index([status])
+  @@index([paidAt])
+  @@index([deliveredAt])
 }
 
 model Interaction {

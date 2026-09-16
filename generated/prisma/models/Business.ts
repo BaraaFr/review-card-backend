@@ -29,6 +29,7 @@ export type BusinessMinAggregateOutputType = {
   name: string | null
   logoUrl: string | null
   ownerId: string | null
+  trialStartedAt: Date | null
   weeklyReportEnabled: boolean | null
   weeklyReportDay: $Enums.WeeklyReportDay | null
   weeklyReportTime: string | null
@@ -44,6 +45,7 @@ export type BusinessMaxAggregateOutputType = {
   name: string | null
   logoUrl: string | null
   ownerId: string | null
+  trialStartedAt: Date | null
   weeklyReportEnabled: boolean | null
   weeklyReportDay: $Enums.WeeklyReportDay | null
   weeklyReportTime: string | null
@@ -59,6 +61,7 @@ export type BusinessCountAggregateOutputType = {
   name: number
   logoUrl: number
   ownerId: number
+  trialStartedAt: number
   weeklyReportEnabled: number
   weeklyReportDay: number
   weeklyReportTime: number
@@ -76,6 +79,7 @@ export type BusinessMinAggregateInputType = {
   name?: true
   logoUrl?: true
   ownerId?: true
+  trialStartedAt?: true
   weeklyReportEnabled?: true
   weeklyReportDay?: true
   weeklyReportTime?: true
@@ -91,6 +95,7 @@ export type BusinessMaxAggregateInputType = {
   name?: true
   logoUrl?: true
   ownerId?: true
+  trialStartedAt?: true
   weeklyReportEnabled?: true
   weeklyReportDay?: true
   weeklyReportTime?: true
@@ -106,6 +111,7 @@ export type BusinessCountAggregateInputType = {
   name?: true
   logoUrl?: true
   ownerId?: true
+  trialStartedAt?: true
   weeklyReportEnabled?: true
   weeklyReportDay?: true
   weeklyReportTime?: true
@@ -194,6 +200,7 @@ export type BusinessGroupByOutputType = {
   name: string
   logoUrl: string | null
   ownerId: string
+  trialStartedAt: Date | null
   weeklyReportEnabled: boolean
   weeklyReportDay: $Enums.WeeklyReportDay
   weeklyReportTime: string
@@ -230,6 +237,7 @@ export type BusinessWhereInput = {
   name?: Prisma.StringFilter<"Business"> | string
   logoUrl?: Prisma.StringNullableFilter<"Business"> | string | null
   ownerId?: Prisma.StringFilter<"Business"> | string
+  trialStartedAt?: Prisma.DateTimeNullableFilter<"Business"> | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFilter<"Business"> | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFilter<"Business"> | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFilter<"Business"> | string
@@ -249,6 +257,7 @@ export type BusinessOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  trialStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   weeklyReportEnabled?: Prisma.SortOrder
   weeklyReportDay?: Prisma.SortOrder
   weeklyReportTime?: Prisma.SortOrder
@@ -271,6 +280,7 @@ export type BusinessWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Business"> | string
   logoUrl?: Prisma.StringNullableFilter<"Business"> | string | null
   ownerId?: Prisma.StringFilter<"Business"> | string
+  trialStartedAt?: Prisma.DateTimeNullableFilter<"Business"> | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFilter<"Business"> | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFilter<"Business"> | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFilter<"Business"> | string
@@ -290,6 +300,7 @@ export type BusinessOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  trialStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   weeklyReportEnabled?: Prisma.SortOrder
   weeklyReportDay?: Prisma.SortOrder
   weeklyReportTime?: Prisma.SortOrder
@@ -311,6 +322,7 @@ export type BusinessScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Business"> | string
   logoUrl?: Prisma.StringNullableWithAggregatesFilter<"Business"> | string | null
   ownerId?: Prisma.StringWithAggregatesFilter<"Business"> | string
+  trialStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
   weeklyReportEnabled?: Prisma.BoolWithAggregatesFilter<"Business"> | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayWithAggregatesFilter<"Business"> | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringWithAggregatesFilter<"Business"> | string
@@ -325,6 +337,7 @@ export type BusinessCreateInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -344,6 +357,7 @@ export type BusinessUncheckedCreateInput = {
   name: string
   logoUrl?: string | null
   ownerId: string
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -361,6 +375,7 @@ export type BusinessUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -380,6 +395,7 @@ export type BusinessUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -398,6 +414,7 @@ export type BusinessCreateManyInput = {
   name: string
   logoUrl?: string | null
   ownerId: string
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -412,6 +429,7 @@ export type BusinessUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -427,6 +445,7 @@ export type BusinessUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -457,6 +476,7 @@ export type BusinessCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  trialStartedAt?: Prisma.SortOrder
   weeklyReportEnabled?: Prisma.SortOrder
   weeklyReportDay?: Prisma.SortOrder
   weeklyReportTime?: Prisma.SortOrder
@@ -472,6 +492,7 @@ export type BusinessMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  trialStartedAt?: Prisma.SortOrder
   weeklyReportEnabled?: Prisma.SortOrder
   weeklyReportDay?: Prisma.SortOrder
   weeklyReportTime?: Prisma.SortOrder
@@ -487,6 +508,7 @@ export type BusinessMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  trialStartedAt?: Prisma.SortOrder
   weeklyReportEnabled?: Prisma.SortOrder
   weeklyReportDay?: Prisma.SortOrder
   weeklyReportTime?: Prisma.SortOrder
@@ -593,6 +615,7 @@ export type BusinessCreateWithoutOwnerInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -610,6 +633,7 @@ export type BusinessUncheckedCreateWithoutOwnerInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -657,6 +681,7 @@ export type BusinessScalarWhereInput = {
   name?: Prisma.StringFilter<"Business"> | string
   logoUrl?: Prisma.StringNullableFilter<"Business"> | string | null
   ownerId?: Prisma.StringFilter<"Business"> | string
+  trialStartedAt?: Prisma.DateTimeNullableFilter<"Business"> | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFilter<"Business"> | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFilter<"Business"> | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFilter<"Business"> | string
@@ -671,6 +696,7 @@ export type BusinessCreateWithoutWeeklyReportDeliveriesInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -689,6 +715,7 @@ export type BusinessUncheckedCreateWithoutWeeklyReportDeliveriesInput = {
   name: string
   logoUrl?: string | null
   ownerId: string
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -721,6 +748,7 @@ export type BusinessUpdateWithoutWeeklyReportDeliveriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -739,6 +767,7 @@ export type BusinessUncheckedUpdateWithoutWeeklyReportDeliveriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -755,6 +784,7 @@ export type BusinessCreateWithoutStoresInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -773,6 +803,7 @@ export type BusinessUncheckedCreateWithoutStoresInput = {
   name: string
   logoUrl?: string | null
   ownerId: string
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -805,6 +836,7 @@ export type BusinessUpdateWithoutStoresInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -823,6 +855,7 @@ export type BusinessUncheckedUpdateWithoutStoresInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -839,6 +872,7 @@ export type BusinessCreateWithoutSubscriptionsInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -857,6 +891,7 @@ export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
   name: string
   logoUrl?: string | null
   ownerId: string
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -889,6 +924,7 @@ export type BusinessUpdateWithoutSubscriptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -907,6 +943,7 @@ export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -923,6 +960,7 @@ export type BusinessCreateManyOwnerInput = {
   id?: string
   name: string
   logoUrl?: string | null
+  trialStartedAt?: Date | string | null
   weeklyReportEnabled?: boolean
   weeklyReportDay?: $Enums.WeeklyReportDay
   weeklyReportTime?: string
@@ -937,6 +975,7 @@ export type BusinessUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -954,6 +993,7 @@ export type BusinessUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -971,6 +1011,7 @@ export type BusinessUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trialStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   weeklyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   weeklyReportDay?: Prisma.EnumWeeklyReportDayFieldUpdateOperationsInput | $Enums.WeeklyReportDay
   weeklyReportTime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1035,6 +1076,7 @@ export type BusinessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   logoUrl?: boolean
   ownerId?: boolean
+  trialStartedAt?: boolean
   weeklyReportEnabled?: boolean
   weeklyReportDay?: boolean
   weeklyReportTime?: boolean
@@ -1055,6 +1097,7 @@ export type BusinessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   logoUrl?: boolean
   ownerId?: boolean
+  trialStartedAt?: boolean
   weeklyReportEnabled?: boolean
   weeklyReportDay?: boolean
   weeklyReportTime?: boolean
@@ -1071,6 +1114,7 @@ export type BusinessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   logoUrl?: boolean
   ownerId?: boolean
+  trialStartedAt?: boolean
   weeklyReportEnabled?: boolean
   weeklyReportDay?: boolean
   weeklyReportTime?: boolean
@@ -1087,6 +1131,7 @@ export type BusinessSelectScalar = {
   name?: boolean
   logoUrl?: boolean
   ownerId?: boolean
+  trialStartedAt?: boolean
   weeklyReportEnabled?: boolean
   weeklyReportDay?: boolean
   weeklyReportTime?: boolean
@@ -1097,7 +1142,7 @@ export type BusinessSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logoUrl" | "ownerId" | "weeklyReportEnabled" | "weeklyReportDay" | "weeklyReportTime" | "weeklyReportTimeZone" | "weeklyReportEmail" | "weeklyReportLastSentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["business"]>
+export type BusinessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logoUrl" | "ownerId" | "trialStartedAt" | "weeklyReportEnabled" | "weeklyReportDay" | "weeklyReportTime" | "weeklyReportTimeZone" | "weeklyReportEmail" | "weeklyReportLastSentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["business"]>
 export type BusinessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   weeklyReportDeliveries?: boolean | Prisma.Business$weeklyReportDeliveriesArgs<ExtArgs>
@@ -1125,6 +1170,7 @@ export type $BusinessPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     logoUrl: string | null
     ownerId: string
+    trialStartedAt: Date | null
     weeklyReportEnabled: boolean
     weeklyReportDay: $Enums.WeeklyReportDay
     weeklyReportTime: string
@@ -1564,6 +1610,7 @@ export interface BusinessFieldRefs {
   readonly name: Prisma.FieldRef<"Business", 'String'>
   readonly logoUrl: Prisma.FieldRef<"Business", 'String'>
   readonly ownerId: Prisma.FieldRef<"Business", 'String'>
+  readonly trialStartedAt: Prisma.FieldRef<"Business", 'DateTime'>
   readonly weeklyReportEnabled: Prisma.FieldRef<"Business", 'Boolean'>
   readonly weeklyReportDay: Prisma.FieldRef<"Business", 'WeeklyReportDay'>
   readonly weeklyReportTime: Prisma.FieldRef<"Business", 'String'>

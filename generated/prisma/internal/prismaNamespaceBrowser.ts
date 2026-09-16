@@ -143,6 +143,7 @@ export const BusinessScalarFieldEnum = {
   name: 'name',
   logoUrl: 'logoUrl',
   ownerId: 'ownerId',
+  trialStartedAt: 'trialStartedAt',
   weeklyReportEnabled: 'weeklyReportEnabled',
   weeklyReportDay: 'weeklyReportDay',
   weeklyReportTime: 'weeklyReportTime',
@@ -178,6 +179,10 @@ export const CardScalarFieldEnum = {
   label: 'label',
   status: 'status',
   storeId: 'storeId',
+  salePriceCents: 'salePriceCents',
+  paidAt: 'paidAt',
+  paymentMethod: 'paymentMethod',
+  deliveredAt: 'deliveredAt',
   assignedAt: 'assignedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

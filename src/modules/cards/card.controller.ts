@@ -8,6 +8,7 @@ import QRCode from "qrcode";
 import {
   assignCardSchema,
   createCardSchema,
+  deliverCardSchema,
   listCardsQuerySchema,
   updateCardSchema,
 } from "./card.schema.js";
@@ -411,3 +412,102 @@ export const getCardQr = async (
     });
   }
 };
+
+export const deliverCard =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+    try {
+      const validation =
+        deliverCardSchema.safeParse(
+          req.body
+        );
+
+      if (
+        !validation.success
+      ) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+
+            message:
+              "Validation failed",
+
+            errors:
+              validation.error.flatten(),
+          });
+      }
+
+      const card =
+        await cardService.deliver(
+          req.params.id as string,
+          validation.data
+        );
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          message:
+            "Card delivered and payment recorded successfully",
+
+          data: {
+            card,
+          },
+        });
+    } catch (error) {
+      if (
+        error instanceof Error
+      ) {
+        switch (
+        error.message
+        ) {
+          case "CARD_NOT_FOUND":
+            return res
+              .status(404)
+              .json({
+                success: false,
+                message:
+                  "Card not found",
+              });
+
+          case "CARD_NOT_ASSIGNED":
+            return res
+              .status(409)
+              .json({
+                success: false,
+
+                message:
+                  "Assign the card to a location before delivering it",
+              });
+
+          case "CARD_ALREADY_DELIVERED":
+            return res
+              .status(409)
+              .json({
+                success: false,
+
+                message:
+                  "This card has already been delivered",
+              });
+        }
+      }
+
+      console.error(
+        "deliverCard error:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          success: false,
+
+          message:
+            "Failed to deliver card",
+        });
+    }
+  };

@@ -67,6 +67,27 @@ export const updateSubscriptionSchema =
       }
     );
 
+
+export const activatePaidSubscriptionSchema =
+  z.object({
+    plan: z.enum([
+      "STARTER",
+      "PRO",
+      "BUSINESS",
+    ]),
+
+    months: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(12)
+      .default(1),
+  });
+
+export type ActivatePaidSubscriptionInput =
+  z.infer<
+    typeof activatePaidSubscriptionSchema
+  >;
 export type CreateSubscriptionInput =
   z.infer<
     typeof createSubscriptionSchema

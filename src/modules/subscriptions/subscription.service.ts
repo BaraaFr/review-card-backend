@@ -9,16 +9,19 @@ import {
 } from "../../utils/subscription.js";
 
 import type {
+  ActivatePaidSubscriptionInput,
   CreateSubscriptionInput,
   UpdateSubscriptionInput,
 } from "./subscription.schema.js";
+import { addDays, addMonths } from "date-fns";
+import { TRIAL_DURATION_DAYS } from "../../config/commercial.js";
 
 type CurrentUser = {
   id: string;
 
   role:
-    | "SUPER_ADMIN"
-    | "BUSINESS_OWNER";
+  | "SUPER_ADMIN"
+  | "BUSINESS_OWNER";
 };
 
 export const subscriptionService = {
@@ -50,9 +53,423 @@ export const subscriptionService = {
 
       limits:
         PLAN_LIMITS[
-          subscription.plan
+        subscription.plan
         ],
     };
+  },
+
+  async startTrial(
+    businessId: string
+  ) {
+    const now =
+      new Date();
+
+    const expiresAt =
+      addDays(
+        now,
+        TRIAL_DURATION_DAYS
+      );
+
+    return prisma.$transaction(
+      async (tx) => {
+        const business =
+          await tx.business.findUnique({
+            where: {
+              id: businessId,
+            },
+
+            select: {
+              id: true,
+
+              trialStartedAt:
+                true,
+            },
+          });
+
+        if (!business) {
+          throw new Error(
+            "BUSINESS_NOT_FOUND"
+          );
+        }
+
+        /*
+         * Each business gets exactly
+         * one free trial.
+         */
+        if (
+          business.trialStartedAt
+        ) {
+          throw new Error(
+            "TRIAL_ALREADY_USED"
+          );
+        }
+
+        /*
+         * Trial cannot start until at
+         * least one physical card has
+         * been paid for and delivered.
+         */
+        const deliveredCards =
+          await tx.card.count({
+            where: {
+              paidAt: {
+                not: null,
+              },
+
+              deliveredAt: {
+                not: null,
+              },
+
+              store: {
+                is: {
+                  businessId,
+                },
+              },
+            },
+          });
+
+        if (
+          deliveredCards < 1
+        ) {
+          throw new Error(
+            "DELIVERED_CARD_REQUIRED"
+          );
+        }
+
+        /*
+         * A free trial uses STARTER
+         * limits.
+         */
+        const storesCount =
+          await tx.store.count({
+            where: {
+              businessId,
+            },
+          });
+
+        if (
+          storesCount >
+          PLAN_LIMITS.STARTER.stores
+        ) {
+          throw new Error(
+            "TRIAL_STORE_LIMIT_REACHED"
+          );
+        }
+
+        const cardsCount =
+          await tx.card.count({
+            where: {
+              store: {
+                is: {
+                  businessId,
+                },
+              },
+
+              status: {
+                not:
+                  "UNASSIGNED",
+              },
+            },
+          });
+
+        if (
+          cardsCount >
+          PLAN_LIMITS.STARTER.cards
+        ) {
+          throw new Error(
+            "TRIAL_CARD_LIMIT_REACHED"
+          );
+        }
+
+        const currentSubscription =
+          await tx.subscription.findFirst({
+            where: {
+              businessId,
+            },
+
+            orderBy: {
+              createdAt:
+                "desc",
+            },
+          });
+
+        /*
+         * Don't overwrite an existing
+         * usable subscription.
+         */
+        if (
+          currentSubscription &&
+          isSubscriptionUsable(
+            currentSubscription
+          )
+        ) {
+          throw new Error(
+            "SUBSCRIPTION_ALREADY_ACTIVE"
+          );
+        }
+
+        /*
+         * Atomically reserve the trial.
+         *
+         * This also protects against
+         * two requests being made at
+         * almost the same time.
+         */
+        const claimedTrial =
+          await tx.business.updateMany({
+            where: {
+              id: businessId,
+
+              trialStartedAt:
+                null,
+            },
+
+            data: {
+              trialStartedAt:
+                now,
+            },
+          });
+
+        if (
+          claimedTrial.count !== 1
+        ) {
+          throw new Error(
+            "TRIAL_ALREADY_USED"
+          );
+        }
+
+        /*
+         * Expire previous inactive
+         * subscription records if your
+         * system allows multiple rows.
+         */
+        await tx.subscription.updateMany({
+          where: {
+            businessId,
+
+            status: {
+              in: [
+                "TRIAL",
+                "ACTIVE",
+                "PAST_DUE",
+              ],
+            },
+          },
+
+          data: {
+            status:
+              "EXPIRED",
+          },
+        });
+
+        return tx.subscription.create({
+          data: {
+            businessId,
+
+            plan:
+              "STARTER",
+
+            status:
+              "TRIAL",
+
+            startsAt:
+              now,
+
+            expiresAt,
+          },
+        });
+      }
+    );
+  },
+
+  async activatePaidPlan(
+    businessId: string,
+    data: ActivatePaidSubscriptionInput
+  ) {
+    const now =
+      new Date();
+
+    return prisma.$transaction(
+      async (tx) => {
+        const business =
+          await tx.business.findUnique({
+            where: {
+              id: businessId,
+            },
+
+            select: {
+              id: true,
+            },
+          });
+
+        if (!business) {
+          throw new Error(
+            "BUSINESS_NOT_FOUND"
+          );
+        }
+
+        const limits =
+          PLAN_LIMITS[
+          data.plan
+          ];
+
+        /*
+         * Make sure the selected paid
+         * plan can actually contain the
+         * business's current locations.
+         */
+        const storesCount =
+          await tx.store.count({
+            where: {
+              businessId,
+            },
+          });
+
+        if (
+          storesCount >
+          limits.stores
+        ) {
+          throw new Error(
+            "PLAN_STORE_LIMIT_EXCEEDED"
+          );
+        }
+
+        const cardsCount =
+          await tx.card.count({
+            where: {
+              store: {
+                is: {
+                  businessId,
+                },
+              },
+
+              status: {
+                not:
+                  "UNASSIGNED",
+              },
+            },
+          });
+
+        if (
+          cardsCount >
+          limits.cards
+        ) {
+          throw new Error(
+            "PLAN_CARD_LIMIT_EXCEEDED"
+          );
+        }
+
+        const currentSubscription =
+          await tx.subscription.findFirst({
+            where: {
+              businessId,
+            },
+
+            orderBy: {
+              createdAt:
+                "desc",
+            },
+          });
+
+        /*
+         * Preserve remaining time when
+         * the customer pays early.
+         *
+         * Example:
+         *
+         * Trial ends Oct 30
+         * Customer pays Oct 20
+         *
+         * Paid month ends Nov 30,
+         * NOT Nov 20.
+         */
+        const hasRemainingTime =
+          Boolean(
+            currentSubscription &&
+            (
+              currentSubscription.status ===
+              "TRIAL" ||
+              currentSubscription.status ===
+              "ACTIVE"
+            ) &&
+            currentSubscription.expiresAt &&
+            currentSubscription.expiresAt >
+            now
+          );
+
+        const renewalBase =
+          hasRemainingTime &&
+            currentSubscription
+              ?.expiresAt
+            ? currentSubscription.expiresAt
+            : now;
+
+        const expiresAt =
+          addMonths(
+            renewalBase,
+            data.months
+          );
+
+        /*
+         * Continue using the current
+         * subscription record where
+         * possible.
+         */
+        if (
+          currentSubscription
+        ) {
+          return tx.subscription.update({
+            where: {
+              id:
+                currentSubscription.id,
+            },
+
+            data: {
+              plan:
+                data.plan,
+
+              status:
+                "ACTIVE",
+
+              /*
+               * If this is an early
+               * conversion from trial,
+               * preserve the original
+               * start date.
+               */
+              startsAt:
+                hasRemainingTime
+                  ? currentSubscription
+                    .startsAt
+                  : now,
+
+              expiresAt,
+            },
+          });
+        }
+
+        /*
+         * Customer somehow starts
+         * directly on a paid plan.
+         */
+        return tx.subscription.create({
+          data: {
+            businessId,
+
+            plan:
+              data.plan,
+
+            status:
+              "ACTIVE",
+
+            startsAt:
+              now,
+
+            expiresAt,
+          },
+        });
+      }
+    );
   },
 
   async getAccessibleBusiness(
@@ -64,10 +481,10 @@ export const subscriptionService = {
         id: businessId,
 
         ...(user.role !==
-        "SUPER_ADMIN"
+          "SUPER_ADMIN"
           ? {
-              ownerId: user.id,
-            }
+            ownerId: user.id,
+          }
           : {}),
       },
     });
@@ -230,32 +647,39 @@ export const subscriptionService = {
 
     return {
       subscription,
+      trial: {
+        eligible:
+          !business.trialStartedAt,
 
+        startedAt:
+          business.trialStartedAt,
+      },
       usage: {
         stores,
         cards,
       },
-
       remaining: subscription
         ? {
-            stores: Math.max(
-              0,
-              subscription.limits
-                .stores -
-                stores
-            ),
+          stores: Math.max(
+            0,
+            subscription.limits
+              .stores -
+            stores
+          ),
 
-            cards: Math.max(
-              0,
-              subscription.limits
-                .cards -
-                cards
-            ),
-          }
+          cards: Math.max(
+            0,
+            subscription.limits
+              .cards -
+            cards
+          ),
+        }
         : {
-            stores: 0,
-            cards: 0,
-          },
+          stores: 0,
+          cards: 0,
+        },
     };
   },
+
+
 };

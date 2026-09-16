@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   assignCard,
   createCard,
+  deliverCard,
   getCard,
   getCardQr,
   getCards,
@@ -55,6 +56,13 @@ router.post(
   "/:id/unassign",
   authorize("SUPER_ADMIN"),
   unassignCard
+);
+
+router.post(
+  "/:id/deliver",
+  authenticate,
+  authorize("SUPER_ADMIN"),
+  deliverCard
 );
 
 export default router;
