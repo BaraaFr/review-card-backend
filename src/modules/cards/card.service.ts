@@ -6,6 +6,7 @@ import { getCardUrls } from "../../utils/card-url.js";
 import type {
   AssignCardInput,
   CreateCardInput,
+  DeliverCardInput,
   ListCardsQuery,
   UpdateCardInput,
 } from "./card.schema.js";
@@ -13,6 +14,8 @@ import type {
 import {
   subscriptionService,
 } from "../subscriptions/subscription.service.js";
+import { PLAN_LIMITS } from "../../config/plans.js";
+import { CARD_PRICE_CENTS } from "../../config/commercial.js";
 
 type CurrentUser = {
   id: string;
@@ -58,51 +61,51 @@ export const cardService = {
     const skip =
       (query.page - 1) * query.limit;
 
-      const where = {
-        ...(query.status
-          ? {
-              status: query.status,
-            }
-          : {}),
-      
-        ...(query.storeId
-          ? {
-              storeId:
-                query.storeId,
-            }
-          : {}),
-      
-        ...(
-          query.businessId ||
+    const where = {
+      ...(query.status
+        ? {
+          status: query.status,
+        }
+        : {}),
+
+      ...(query.storeId
+        ? {
+          storeId:
+            query.storeId,
+        }
+        : {}),
+
+      ...(
+        query.businessId ||
           user.role !==
-            "SUPER_ADMIN"
-            ? {
-                store: {
-                  is: {
-                    ...(query.businessId
-                      ? {
-                          businessId:
-                            query.businessId,
-                        }
-                      : {}),
-      
-                    ...(user.role !==
-                    "SUPER_ADMIN"
-                      ? {
-                          business: {
-                            is: {
-                              ownerId:
-                                user.id,
-                            },
-                          },
-                        }
-                      : {}),
-                  },
-                },
-              }
-            : {}
-        ),
-      };
+          "SUPER_ADMIN"
+          ? {
+            store: {
+              is: {
+                ...(query.businessId
+                  ? {
+                    businessId:
+                      query.businessId,
+                  }
+                  : {}),
+
+                ...(user.role !==
+                  "SUPER_ADMIN"
+                  ? {
+                    business: {
+                      is: {
+                        ownerId:
+                          user.id,
+                      },
+                    },
+                  }
+                  : {}),
+              },
+            },
+          }
+          : {}
+      ),
+    };
 
     const [cards, total] =
       await Promise.all([
@@ -257,6 +260,9 @@ export const cardService = {
           where: {
             id: cardId,
           },
+          include:{
+            store:true
+          }
         }),
 
         prisma.store.findUnique({
@@ -298,53 +304,40 @@ export const cardService = {
         store.business.id
       );
 
-    if (
-      !subscription ||
-      !subscription.usable
-    ) {
-      throw new Error(
-        "SUBSCRIPTION_REQUIRED"
-      );
-    }
-    const alreadyBelongsToBusiness =
-      card.storeId
-        ? await prisma.store.findFirst({
-          where: {
-            id: card.storeId,
 
-            businessId:
-              store.business.id,
-          },
+    const cardLimit =
+      subscription?.limits.cards ??
+      PLAN_LIMITS.STARTER.cards;
 
-          select: {
-            id: true,
-          },
-        })
-        : null;
-
-    if (!alreadyBelongsToBusiness) {
-      const activeCardsCount =
-        await prisma.card.count({
-          where: {
-            status: "ACTIVE",
-
-            store: {
-              is: {
-                businessId:
-                  store.business.id,
-              },
+    const assignedCardsCount =
+      await prisma.card.count({
+        where: {
+          store: {
+            is: {
+              businessId:
+                store.business.id,
             },
           },
-        });
 
-      if (
-        activeCardsCount >=
-        subscription.limits.cards
-      ) {
-        throw new Error(
-          "CARD_LIMIT_REACHED"
-        );
-      }
+          status: {
+            not: "UNASSIGNED",
+          },
+        },
+      });
+
+    const alreadyBelongsToBusiness =
+      Boolean(
+        card.store?.businessId ===
+        store.business.id
+      );
+
+    if (
+      !alreadyBelongsToBusiness &&
+      assignedCardsCount >= cardLimit
+    ) {
+      throw new Error(
+        "CARD_LIMIT_REACHED"
+      );
     }
 
     const updated = await prisma.card.update({
@@ -406,5 +399,79 @@ export const cardService = {
       });
 
     return withUrls(updated);
+  },
+
+  async deliver(
+    cardId: string,
+    data: DeliverCardInput
+  ) {
+    const card =
+      await prisma.card.findUnique({
+        where: {
+          id: cardId,
+        },
+  
+        include: {
+          store: {
+            include: {
+              business: true,
+            },
+          },
+        },
+      });
+  
+    if (!card) {
+      throw new Error(
+        "CARD_NOT_FOUND"
+      );
+    }
+  
+    if (!card.storeId) {
+      throw new Error(
+        "CARD_NOT_ASSIGNED"
+      );
+    }
+  
+    if (card.deliveredAt) {
+      throw new Error(
+        "CARD_ALREADY_DELIVERED"
+      );
+    }
+  
+    const now =
+      new Date();
+  
+    const updatedCard =
+      await prisma.card.update({
+        where: {
+          id: card.id,
+        },
+  
+        data: {
+          salePriceCents:
+            CARD_PRICE_CENTS,
+  
+          paymentMethod:
+            data.paymentMethod,
+  
+          paidAt:
+            now,
+  
+          deliveredAt:
+            now,
+        },
+  
+        include: {
+          store: {
+            include: {
+              business: true,
+            },
+          },
+        },
+      });
+  
+    return withUrls(
+      updatedCard
+    );
   },
 };

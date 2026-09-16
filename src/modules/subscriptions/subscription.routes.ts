@@ -1,9 +1,11 @@
 import { Router } from "express";
 
 import {
+  activatePaidSubscription,
   createSubscription,
   getCurrentSubscription,
   getSubscriptionUsage,
+  startBusinessTrial,
   updateSubscription,
 } from "./subscription.controller.js";
 
@@ -46,6 +48,20 @@ router.patch(
   "/:id",
   authorize("SUPER_ADMIN"),
   updateSubscription
+);
+
+router.post(
+  "/businesses/:businessId/start-trial",
+  authenticate,
+  authorize("SUPER_ADMIN"),
+  startBusinessTrial
+);
+
+router.post(
+  "/businesses/:businessId/activate-paid",
+  authenticate,
+  authorize("SUPER_ADMIN"),
+  activatePaidSubscription
 );
 
 export default router;

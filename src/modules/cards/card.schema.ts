@@ -70,6 +70,20 @@ export const listCardsQuerySchema = z.object({
     .optional(),
 });
 
+export const deliverCardSchema =
+  z.object({
+    paymentMethod: z.enum([
+      "CASH",
+      "WHISH",
+      "OTHER",
+    ]),
+  });
+
+export type DeliverCardInput =
+  z.infer<
+    typeof deliverCardSchema
+  >;
+
 export type CreateCardInput = z.infer<
   typeof createCardSchema
 >;

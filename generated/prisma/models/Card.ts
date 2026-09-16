@@ -20,8 +20,18 @@ export type CardModel = runtime.Types.Result.DefaultSelection<Prisma.$CardPayloa
 
 export type AggregateCard = {
   _count: CardCountAggregateOutputType | null
+  _avg: CardAvgAggregateOutputType | null
+  _sum: CardSumAggregateOutputType | null
   _min: CardMinAggregateOutputType | null
   _max: CardMaxAggregateOutputType | null
+}
+
+export type CardAvgAggregateOutputType = {
+  salePriceCents: number | null
+}
+
+export type CardSumAggregateOutputType = {
+  salePriceCents: number | null
 }
 
 export type CardMinAggregateOutputType = {
@@ -30,6 +40,10 @@ export type CardMinAggregateOutputType = {
   label: string | null
   status: $Enums.CardStatus | null
   storeId: string | null
+  salePriceCents: number | null
+  paidAt: Date | null
+  paymentMethod: $Enums.CardPaymentMethod | null
+  deliveredAt: Date | null
   assignedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +55,10 @@ export type CardMaxAggregateOutputType = {
   label: string | null
   status: $Enums.CardStatus | null
   storeId: string | null
+  salePriceCents: number | null
+  paidAt: Date | null
+  paymentMethod: $Enums.CardPaymentMethod | null
+  deliveredAt: Date | null
   assignedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +70,10 @@ export type CardCountAggregateOutputType = {
   label: number
   status: number
   storeId: number
+  salePriceCents: number
+  paidAt: number
+  paymentMethod: number
+  deliveredAt: number
   assignedAt: number
   createdAt: number
   updatedAt: number
@@ -59,12 +81,24 @@ export type CardCountAggregateOutputType = {
 }
 
 
+export type CardAvgAggregateInputType = {
+  salePriceCents?: true
+}
+
+export type CardSumAggregateInputType = {
+  salePriceCents?: true
+}
+
 export type CardMinAggregateInputType = {
   id?: true
   code?: true
   label?: true
   status?: true
   storeId?: true
+  salePriceCents?: true
+  paidAt?: true
+  paymentMethod?: true
+  deliveredAt?: true
   assignedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +110,10 @@ export type CardMaxAggregateInputType = {
   label?: true
   status?: true
   storeId?: true
+  salePriceCents?: true
+  paidAt?: true
+  paymentMethod?: true
+  deliveredAt?: true
   assignedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +125,10 @@ export type CardCountAggregateInputType = {
   label?: true
   status?: true
   storeId?: true
+  salePriceCents?: true
+  paidAt?: true
+  paymentMethod?: true
+  deliveredAt?: true
   assignedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -131,6 +173,18 @@ export type CardAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CardAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CardSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CardMinAggregateInputType
@@ -161,6 +215,8 @@ export type CardGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: CardCountAggregateInputType | true
+  _avg?: CardAvgAggregateInputType
+  _sum?: CardSumAggregateInputType
   _min?: CardMinAggregateInputType
   _max?: CardMaxAggregateInputType
 }
@@ -171,10 +227,16 @@ export type CardGroupByOutputType = {
   label: string | null
   status: $Enums.CardStatus
   storeId: string | null
+  salePriceCents: number | null
+  paidAt: Date | null
+  paymentMethod: $Enums.CardPaymentMethod | null
+  deliveredAt: Date | null
   assignedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: CardCountAggregateOutputType | null
+  _avg: CardAvgAggregateOutputType | null
+  _sum: CardSumAggregateOutputType | null
   _min: CardMinAggregateOutputType | null
   _max: CardMaxAggregateOutputType | null
 }
@@ -203,6 +265,10 @@ export type CardWhereInput = {
   label?: Prisma.StringNullableFilter<"Card"> | string | null
   status?: Prisma.EnumCardStatusFilter<"Card"> | $Enums.CardStatus
   storeId?: Prisma.StringNullableFilter<"Card"> | string | null
+  salePriceCents?: Prisma.IntNullableFilter<"Card"> | number | null
+  paidAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
+  paymentMethod?: Prisma.EnumCardPaymentMethodNullableFilter<"Card"> | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   assignedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
@@ -216,6 +282,10 @@ export type CardOrderByWithRelationInput = {
   label?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePriceCents?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -232,6 +302,10 @@ export type CardWhereUniqueInput = Prisma.AtLeast<{
   label?: Prisma.StringNullableFilter<"Card"> | string | null
   status?: Prisma.EnumCardStatusFilter<"Card"> | $Enums.CardStatus
   storeId?: Prisma.StringNullableFilter<"Card"> | string | null
+  salePriceCents?: Prisma.IntNullableFilter<"Card"> | number | null
+  paidAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
+  paymentMethod?: Prisma.EnumCardPaymentMethodNullableFilter<"Card"> | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   assignedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
@@ -245,12 +319,18 @@ export type CardOrderByWithAggregationInput = {
   label?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  salePriceCents?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CardCountOrderByAggregateInput
+  _avg?: Prisma.CardAvgOrderByAggregateInput
   _max?: Prisma.CardMaxOrderByAggregateInput
   _min?: Prisma.CardMinOrderByAggregateInput
+  _sum?: Prisma.CardSumOrderByAggregateInput
 }
 
 export type CardScalarWhereWithAggregatesInput = {
@@ -262,6 +342,10 @@ export type CardScalarWhereWithAggregatesInput = {
   label?: Prisma.StringNullableWithAggregatesFilter<"Card"> | string | null
   status?: Prisma.EnumCardStatusWithAggregatesFilter<"Card"> | $Enums.CardStatus
   storeId?: Prisma.StringNullableWithAggregatesFilter<"Card"> | string | null
+  salePriceCents?: Prisma.IntNullableWithAggregatesFilter<"Card"> | number | null
+  paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Card"> | Date | string | null
+  paymentMethod?: Prisma.EnumCardPaymentMethodNullableWithAggregatesFilter<"Card"> | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Card"> | Date | string | null
   assignedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Card"> | Date | string
@@ -272,6 +356,10 @@ export type CardCreateInput = {
   code: string
   label?: string | null
   status?: $Enums.CardStatus
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -285,6 +373,10 @@ export type CardUncheckedCreateInput = {
   label?: string | null
   status?: $Enums.CardStatus
   storeId?: string | null
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -296,6 +388,10 @@ export type CardUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -309,6 +405,10 @@ export type CardUncheckedUpdateInput = {
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -321,6 +421,10 @@ export type CardCreateManyInput = {
   label?: string | null
   status?: $Enums.CardStatus
   storeId?: string | null
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -331,6 +435,10 @@ export type CardUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -342,6 +450,10 @@ export type CardUncheckedUpdateManyInput = {
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -363,9 +475,17 @@ export type CardCountOrderByAggregateInput = {
   label?: Prisma.SortOrder
   status?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  salePriceCents?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CardAvgOrderByAggregateInput = {
+  salePriceCents?: Prisma.SortOrder
 }
 
 export type CardMaxOrderByAggregateInput = {
@@ -374,6 +494,10 @@ export type CardMaxOrderByAggregateInput = {
   label?: Prisma.SortOrder
   status?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  salePriceCents?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -385,9 +509,17 @@ export type CardMinOrderByAggregateInput = {
   label?: Prisma.SortOrder
   status?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  salePriceCents?: Prisma.SortOrder
+  paidAt?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CardSumOrderByAggregateInput = {
+  salePriceCents?: Prisma.SortOrder
 }
 
 export type CardScalarRelationFilter = {
@@ -441,6 +573,18 @@ export type EnumCardStatusFieldUpdateOperationsInput = {
   set?: $Enums.CardStatus
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableEnumCardPaymentMethodFieldUpdateOperationsInput = {
+  set?: $Enums.CardPaymentMethod | null
+}
+
 export type CardCreateNestedOneWithoutInteractionsInput = {
   create?: Prisma.XOR<Prisma.CardCreateWithoutInteractionsInput, Prisma.CardUncheckedCreateWithoutInteractionsInput>
   connectOrCreate?: Prisma.CardCreateOrConnectWithoutInteractionsInput
@@ -460,6 +604,10 @@ export type CardCreateWithoutStoreInput = {
   code: string
   label?: string | null
   status?: $Enums.CardStatus
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -471,6 +619,10 @@ export type CardUncheckedCreateWithoutStoreInput = {
   code: string
   label?: string | null
   status?: $Enums.CardStatus
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -512,6 +664,10 @@ export type CardScalarWhereInput = {
   label?: Prisma.StringNullableFilter<"Card"> | string | null
   status?: Prisma.EnumCardStatusFilter<"Card"> | $Enums.CardStatus
   storeId?: Prisma.StringNullableFilter<"Card"> | string | null
+  salePriceCents?: Prisma.IntNullableFilter<"Card"> | number | null
+  paidAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
+  paymentMethod?: Prisma.EnumCardPaymentMethodNullableFilter<"Card"> | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   assignedAt?: Prisma.DateTimeNullableFilter<"Card"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
@@ -522,6 +678,10 @@ export type CardCreateWithoutInteractionsInput = {
   code: string
   label?: string | null
   status?: $Enums.CardStatus
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -534,6 +694,10 @@ export type CardUncheckedCreateWithoutInteractionsInput = {
   label?: string | null
   status?: $Enums.CardStatus
   storeId?: string | null
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -560,6 +724,10 @@ export type CardUpdateWithoutInteractionsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -572,6 +740,10 @@ export type CardUncheckedUpdateWithoutInteractionsInput = {
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -582,6 +754,10 @@ export type CardCreateManyStoreInput = {
   code: string
   label?: string | null
   status?: $Enums.CardStatus
+  salePriceCents?: number | null
+  paidAt?: Date | string | null
+  paymentMethod?: $Enums.CardPaymentMethod | null
+  deliveredAt?: Date | string | null
   assignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -592,6 +768,10 @@ export type CardUpdateWithoutStoreInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -603,6 +783,10 @@ export type CardUncheckedUpdateWithoutStoreInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -614,6 +798,10 @@ export type CardUncheckedUpdateManyWithoutStoreInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCardStatusFieldUpdateOperationsInput | $Enums.CardStatus
+  salePriceCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.NullableEnumCardPaymentMethodFieldUpdateOperationsInput | $Enums.CardPaymentMethod | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -656,6 +844,10 @@ export type CardSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   label?: boolean
   status?: boolean
   storeId?: boolean
+  salePriceCents?: boolean
+  paidAt?: boolean
+  paymentMethod?: boolean
+  deliveredAt?: boolean
   assignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -670,6 +862,10 @@ export type CardSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   label?: boolean
   status?: boolean
   storeId?: boolean
+  salePriceCents?: boolean
+  paidAt?: boolean
+  paymentMethod?: boolean
+  deliveredAt?: boolean
   assignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -682,6 +878,10 @@ export type CardSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   label?: boolean
   status?: boolean
   storeId?: boolean
+  salePriceCents?: boolean
+  paidAt?: boolean
+  paymentMethod?: boolean
+  deliveredAt?: boolean
   assignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -694,12 +894,16 @@ export type CardSelectScalar = {
   label?: boolean
   status?: boolean
   storeId?: boolean
+  salePriceCents?: boolean
+  paidAt?: boolean
+  paymentMethod?: boolean
+  deliveredAt?: boolean
   assignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "label" | "status" | "storeId" | "assignedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["card"]>
+export type CardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "label" | "status" | "storeId" | "salePriceCents" | "paidAt" | "paymentMethod" | "deliveredAt" | "assignedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["card"]>
 export type CardInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.Card$storeArgs<ExtArgs>
   interactions?: boolean | Prisma.Card$interactionsArgs<ExtArgs>
@@ -724,6 +928,10 @@ export type $CardPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     label: string | null
     status: $Enums.CardStatus
     storeId: string | null
+    salePriceCents: number | null
+    paidAt: Date | null
+    paymentMethod: $Enums.CardPaymentMethod | null
+    deliveredAt: Date | null
     assignedAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -1157,6 +1365,10 @@ export interface CardFieldRefs {
   readonly label: Prisma.FieldRef<"Card", 'String'>
   readonly status: Prisma.FieldRef<"Card", 'CardStatus'>
   readonly storeId: Prisma.FieldRef<"Card", 'String'>
+  readonly salePriceCents: Prisma.FieldRef<"Card", 'Int'>
+  readonly paidAt: Prisma.FieldRef<"Card", 'DateTime'>
+  readonly paymentMethod: Prisma.FieldRef<"Card", 'CardPaymentMethod'>
+  readonly deliveredAt: Prisma.FieldRef<"Card", 'DateTime'>
   readonly assignedAt: Prisma.FieldRef<"Card", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Card", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Card", 'DateTime'>

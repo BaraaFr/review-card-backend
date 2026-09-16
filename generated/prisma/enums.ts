@@ -64,6 +64,15 @@ export const SubscriptionStatus = {
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
 
 
+export const CardPaymentMethod = {
+  CASH: 'CASH',
+  WHISH: 'WHISH',
+  OTHER: 'OTHER'
+} as const
+
+export type CardPaymentMethod = (typeof CardPaymentMethod)[keyof typeof CardPaymentMethod]
+
+
 export const AccountRequestStatus = {
   NEW: 'NEW',
   CONTACTED: 'CONTACTED',

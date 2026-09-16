@@ -1338,6 +1338,7 @@ export const BusinessScalarFieldEnum = {
   name: 'name',
   logoUrl: 'logoUrl',
   ownerId: 'ownerId',
+  trialStartedAt: 'trialStartedAt',
   weeklyReportEnabled: 'weeklyReportEnabled',
   weeklyReportDay: 'weeklyReportDay',
   weeklyReportTime: 'weeklyReportTime',
@@ -1373,6 +1374,10 @@ export const CardScalarFieldEnum = {
   label: 'label',
   status: 'status',
   storeId: 'storeId',
+  salePriceCents: 'salePriceCents',
+  paidAt: 'paidAt',
+  paymentMethod: 'paymentMethod',
+  deliveredAt: 'deliveredAt',
   assignedAt: 'assignedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1603,6 +1608,34 @@ export type ListEnumCardStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CardPaymentMethod'
+ */
+export type EnumCardPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CardPaymentMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'CardPaymentMethod[]'
+ */
+export type ListEnumCardPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CardPaymentMethod[]'>
+    
+
+
+/**
  * Reference to a field of type 'InteractionSource'
  */
 export type EnumInteractionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InteractionSource'>
@@ -1655,20 +1688,6 @@ export type EnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
  * Reference to a field of type 'SubscriptionStatus[]'
  */
 export type ListEnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
