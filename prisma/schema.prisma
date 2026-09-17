@@ -342,6 +342,7 @@ model AccountRequest {
   id String @id @default(cuid())
 
   ownerName String
+  email     String?
   phone     String
   shopName  String
 

@@ -37,6 +37,7 @@ export type AccountRequestSumAggregateOutputType = {
 export type AccountRequestMinAggregateOutputType = {
   id: string | null
   ownerName: string | null
+  email: string | null
   phone: string | null
   shopName: string | null
   businessType: string | null
@@ -53,6 +54,7 @@ export type AccountRequestMinAggregateOutputType = {
 export type AccountRequestMaxAggregateOutputType = {
   id: string | null
   ownerName: string | null
+  email: string | null
   phone: string | null
   shopName: string | null
   businessType: string | null
@@ -69,6 +71,7 @@ export type AccountRequestMaxAggregateOutputType = {
 export type AccountRequestCountAggregateOutputType = {
   id: number
   ownerName: number
+  email: number
   phone: number
   shopName: number
   businessType: number
@@ -95,6 +98,7 @@ export type AccountRequestSumAggregateInputType = {
 export type AccountRequestMinAggregateInputType = {
   id?: true
   ownerName?: true
+  email?: true
   phone?: true
   shopName?: true
   businessType?: true
@@ -111,6 +115,7 @@ export type AccountRequestMinAggregateInputType = {
 export type AccountRequestMaxAggregateInputType = {
   id?: true
   ownerName?: true
+  email?: true
   phone?: true
   shopName?: true
   businessType?: true
@@ -127,6 +132,7 @@ export type AccountRequestMaxAggregateInputType = {
 export type AccountRequestCountAggregateInputType = {
   id?: true
   ownerName?: true
+  email?: true
   phone?: true
   shopName?: true
   businessType?: true
@@ -230,6 +236,7 @@ export type AccountRequestGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type AccountRequestGroupByOutputType = {
   id: string
   ownerName: string
+  email: string | null
   phone: string
   shopName: string
   businessType: string | null
@@ -269,6 +276,7 @@ export type AccountRequestWhereInput = {
   NOT?: Prisma.AccountRequestWhereInput | Prisma.AccountRequestWhereInput[]
   id?: Prisma.StringFilter<"AccountRequest"> | string
   ownerName?: Prisma.StringFilter<"AccountRequest"> | string
+  email?: Prisma.StringNullableFilter<"AccountRequest"> | string | null
   phone?: Prisma.StringFilter<"AccountRequest"> | string
   shopName?: Prisma.StringFilter<"AccountRequest"> | string
   businessType?: Prisma.StringNullableFilter<"AccountRequest"> | string | null
@@ -285,6 +293,7 @@ export type AccountRequestWhereInput = {
 export type AccountRequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   ownerName?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrder
   shopName?: Prisma.SortOrder
   businessType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,6 +313,7 @@ export type AccountRequestWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AccountRequestWhereInput[]
   NOT?: Prisma.AccountRequestWhereInput | Prisma.AccountRequestWhereInput[]
   ownerName?: Prisma.StringFilter<"AccountRequest"> | string
+  email?: Prisma.StringNullableFilter<"AccountRequest"> | string | null
   phone?: Prisma.StringFilter<"AccountRequest"> | string
   shopName?: Prisma.StringFilter<"AccountRequest"> | string
   businessType?: Prisma.StringNullableFilter<"AccountRequest"> | string | null
@@ -320,6 +330,7 @@ export type AccountRequestWhereUniqueInput = Prisma.AtLeast<{
 export type AccountRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   ownerName?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrder
   shopName?: Prisma.SortOrder
   businessType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -344,6 +355,7 @@ export type AccountRequestScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AccountRequestScalarWhereWithAggregatesInput | Prisma.AccountRequestScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"AccountRequest"> | string
   ownerName?: Prisma.StringWithAggregatesFilter<"AccountRequest"> | string
+  email?: Prisma.StringNullableWithAggregatesFilter<"AccountRequest"> | string | null
   phone?: Prisma.StringWithAggregatesFilter<"AccountRequest"> | string
   shopName?: Prisma.StringWithAggregatesFilter<"AccountRequest"> | string
   businessType?: Prisma.StringNullableWithAggregatesFilter<"AccountRequest"> | string | null
@@ -360,6 +372,7 @@ export type AccountRequestScalarWhereWithAggregatesInput = {
 export type AccountRequestCreateInput = {
   id?: string
   ownerName: string
+  email?: string | null
   phone: string
   shopName: string
   businessType?: string | null
@@ -376,6 +389,7 @@ export type AccountRequestCreateInput = {
 export type AccountRequestUncheckedCreateInput = {
   id?: string
   ownerName: string
+  email?: string | null
   phone: string
   shopName: string
   businessType?: string | null
@@ -392,6 +406,7 @@ export type AccountRequestUncheckedCreateInput = {
 export type AccountRequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ownerName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   shopName?: Prisma.StringFieldUpdateOperationsInput | string
   businessType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -408,6 +423,7 @@ export type AccountRequestUpdateInput = {
 export type AccountRequestUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ownerName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   shopName?: Prisma.StringFieldUpdateOperationsInput | string
   businessType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -424,6 +440,7 @@ export type AccountRequestUncheckedUpdateInput = {
 export type AccountRequestCreateManyInput = {
   id?: string
   ownerName: string
+  email?: string | null
   phone: string
   shopName: string
   businessType?: string | null
@@ -440,6 +457,7 @@ export type AccountRequestCreateManyInput = {
 export type AccountRequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ownerName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   shopName?: Prisma.StringFieldUpdateOperationsInput | string
   businessType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -456,6 +474,7 @@ export type AccountRequestUpdateManyMutationInput = {
 export type AccountRequestUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ownerName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   shopName?: Prisma.StringFieldUpdateOperationsInput | string
   businessType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -472,6 +491,7 @@ export type AccountRequestUncheckedUpdateManyInput = {
 export type AccountRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ownerName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   shopName?: Prisma.SortOrder
   businessType?: Prisma.SortOrder
@@ -492,6 +512,7 @@ export type AccountRequestAvgOrderByAggregateInput = {
 export type AccountRequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ownerName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   shopName?: Prisma.SortOrder
   businessType?: Prisma.SortOrder
@@ -508,6 +529,7 @@ export type AccountRequestMaxOrderByAggregateInput = {
 export type AccountRequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ownerName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   shopName?: Prisma.SortOrder
   businessType?: Prisma.SortOrder
@@ -542,6 +564,7 @@ export type EnumAccountRequestStatusFieldUpdateOperationsInput = {
 export type AccountRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   ownerName?: boolean
+  email?: boolean
   phone?: boolean
   shopName?: boolean
   businessType?: boolean
@@ -558,6 +581,7 @@ export type AccountRequestSelect<ExtArgs extends runtime.Types.Extensions.Intern
 export type AccountRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   ownerName?: boolean
+  email?: boolean
   phone?: boolean
   shopName?: boolean
   businessType?: boolean
@@ -574,6 +598,7 @@ export type AccountRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Type
 export type AccountRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   ownerName?: boolean
+  email?: boolean
   phone?: boolean
   shopName?: boolean
   businessType?: boolean
@@ -590,6 +615,7 @@ export type AccountRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
 export type AccountRequestSelectScalar = {
   id?: boolean
   ownerName?: boolean
+  email?: boolean
   phone?: boolean
   shopName?: boolean
   businessType?: boolean
@@ -603,7 +629,7 @@ export type AccountRequestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AccountRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerName" | "phone" | "shopName" | "businessType" | "requestedCards" | "message" | "status" | "adminNote" | "handledById" | "contactedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["accountRequest"]>
+export type AccountRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerName" | "email" | "phone" | "shopName" | "businessType" | "requestedCards" | "message" | "status" | "adminNote" | "handledById" | "contactedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["accountRequest"]>
 
 export type $AccountRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AccountRequest"
@@ -611,6 +637,7 @@ export type $AccountRequestPayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     ownerName: string
+    email: string | null
     phone: string
     shopName: string
     businessType: string | null
@@ -1047,6 +1074,7 @@ export interface Prisma__AccountRequestClient<T, Null = never, ExtArgs extends r
 export interface AccountRequestFieldRefs {
   readonly id: Prisma.FieldRef<"AccountRequest", 'String'>
   readonly ownerName: Prisma.FieldRef<"AccountRequest", 'String'>
+  readonly email: Prisma.FieldRef<"AccountRequest", 'String'>
   readonly phone: Prisma.FieldRef<"AccountRequest", 'String'>
   readonly shopName: Prisma.FieldRef<"AccountRequest", 'String'>
   readonly businessType: Prisma.FieldRef<"AccountRequest", 'String'>

@@ -1442,6 +1442,7 @@ export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[key
 export const AccountRequestScalarFieldEnum = {
   id: 'id',
   ownerName: 'ownerName',
+  email: 'email',
   phone: 'phone',
   shopName: 'shopName',
   businessType: 'businessType',
