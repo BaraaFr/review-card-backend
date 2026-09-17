@@ -5,13 +5,7 @@ import type {
   UpdateStoreInput,
 } from "./store.schema.js";
 
-import {
-  subscriptionService,
-} from "../subscriptions/subscription.service.js";
-
-import {
-  PLAN_LIMITS,
-} from "../../config/plans.js";
+import { resolveProvisioningAccess } from "../../utils/provisioning.js";
 
 
 type CurrentUser = {
@@ -42,55 +36,35 @@ export const storeService = {
     businessId: string,
     data: CreateStoreInput
   ) {
-    const business =
-      await getAccessibleBusiness(
-        user,
-        businessId
-      );
-
+    const business = await getAccessibleBusiness(
+      user,
+      businessId
+    );
+  
     if (!business) {
       throw new Error("BUSINESS_NOT_FOUND");
     }
-
-    const subscription =
-      await subscriptionService.getCurrentForBusiness(
-        businessId
-      );
-
-    if (
-      !subscription ||
-      !subscription.usable
-    ) {
-      throw new Error(
-        "SUBSCRIPTION_REQUIRED"
-      );
-    }
-
+  
+    const { limits } = await resolveProvisioningAccess({
+      businessId,
+      role: user.role,
+    });
+  
     const storesCount = await prisma.store.count({
       where: {
         businessId,
       },
     });
-
-    const limits = PLAN_LIMITS[subscription.plan];
-
-    if (
-      storesCount >=
-      limits.stores
-    ) {
-      throw new Error(
-        "STORE_LIMIT_REACHED"
-      );
+  
+    if (storesCount >= limits.stores) {
+      throw new Error("STORE_LIMIT_REACHED");
     }
-
+  
     return prisma.store.create({
       data: {
         name: data.name,
         address: data.address ?? null,
-
-        googleReviewUrl:
-          data.googleReviewUrl ?? null,
-
+        googleReviewUrl: data.googleReviewUrl ?? null,
         businessId,
       },
     });
