@@ -728,7 +728,9 @@ export function buildBusinessWeeklyReport(
 
       to:
         formatDateInTimeZone(
-          currentFrom,
+          inclusiveEnd(
+            currentTo
+          ),
           timeZone
         ),
 
