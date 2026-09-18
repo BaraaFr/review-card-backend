@@ -1,4 +1,4 @@
-import { calculateChangePercentage, calculatePercentage, calculateOverviewChangePercentage as calculatePercentageChange } from "./utils/analytics-math.js";
+import { calculateChangePercentage, calculatePercentage } from "./utils/analytics-math.js";
 import { prisma } from "../../lib/prisma.js";
 
 import {
@@ -8,139 +8,21 @@ import {
 import type {
   AnalyticsQuery,
 } from "./analytics.schema.js";
-import { resolveAnalyticsRangeQuery, ResolvedAnalyticsRange } from "./utils/analytics-range.util.js";
+import { ResolvedAnalyticsRange } from "./utils/analytics-range.util.js";
 import { iterateMeaningfulInteractions } from "./utils/interaction-batches.js";
 import { ActionCenterItem, CurrentUser, DailyBucket, WeeklyReportHealth } from "./types/index.js";
-import { addUtcCalendarDays, buildInteractionWhere, formatDateOnlyUtc, formatHour, getCardActivityStatus, getCardName, getDateKey, getDateKeyInTimeZone, getDateLabel, getHour, getLocationName, getLocationStatus, getWeekday, normalizeTimeZone, parseDateOnlyUtc, shiftDateKey, WEEKDAYS } from "./utils/helpers.js";
+import { addUtcCalendarDays, buildInteractionWhere, formatDateOnlyUtc, formatHour, getCardActivityStatus, getCardName, getDateKey, getDateLabel, getHour, getLocationName, getLocationStatus, getWeekday, normalizeTimeZone, parseDateOnlyUtc, WEEKDAYS } from "./utils/helpers.js";
 import {
   dashboardOverview,
   dashboardTimeline,
 } from "./dashboard-analytics.service.js";
 
+import {
+  resolveWeeklyReportRange,
+} from "../../utils/weekly-report-range.js";
+
 export const analyticsService = {
-  async overview(
-    user: CurrentUser,
-    query: AnalyticsQuery
-  ) {
-    // const {
-    //   from,
-    //   to,
-    //   previousFrom,
-    //   previousTo,
-    // } =
-    //   getAnalyticsDateRange(
-    //     query
-    //   );
-
-    // const currentWhere =
-    //   buildInteractionWhere(
-    //     user,
-    //     query,
-    //     from,
-    //     to
-    //   );
-
-    // const previousWhere =
-    //   buildInteractionWhere(
-    //     user,
-    //     query,
-    //     previousFrom,
-    //     previousTo
-    //   );
-
-    // const [
-    //   total,
-    //   previousTotal,
-    //   sourceGroups,
-    //   uniqueVisitors,
-    // ] = await Promise.all([
-    //   prisma.interaction.count({
-    //     where: currentWhere,
-    //   }),
-
-    //   prisma.interaction.count({
-    //     where: previousWhere,
-    //   }),
-
-    //   prisma.interaction.groupBy({
-    //     by: ["source"],
-
-    //     where: currentWhere,
-
-    //     _count: {
-    //       _all: true,
-    //     },
-    //   }),
-
-    //   prisma.interaction.groupBy({
-    //     by: ["visitorHash"],
-
-    //     where: {
-    //       ...currentWhere,
-
-    //       visitorHash: {
-    //         not: null,
-    //       },
-    //     },
-
-    //     _count: {
-    //       _all: true,
-    //     },
-    //   }),
-    // ]);
-
-    // let nfc = 0;
-    // let qr = 0;
-    // let unknown = 0;
-
-    // for (
-    //   const group of sourceGroups
-    // ) {
-    //   const count =
-    //     group._count._all;
-
-    //   if (
-    //     group.source === "NFC"
-    //   ) {
-    //     nfc = count;
-    //   } else if (
-    //     group.source === "QR"
-    //   ) {
-    //     qr = count;
-    //   } else {
-    //     unknown = count;
-    //   }
-    // }
-
-    // return {
-    //   period: {
-    //     from,
-    //     to,
-    //   },
-
-    //   totalInteractions: total,
-
-    //   previousInteractions:
-    //     previousTotal,
-
-    //   percentageChange:
-    //     calculatePercentageChange(
-    //       total,
-    //       previousTotal
-    //     ),
-
-    //   approximateUniqueVisitors:
-    //     uniqueVisitors.length,
-
-    //   source: {
-    //     nfc,
-    //     qr,
-    //     unknown,
-    //   },
-    // };
-
-    return dashboardOverview(user, query)
-  },
+  overview: dashboardOverview,
 
   async cards(
     user: CurrentUser,
@@ -182,30 +64,57 @@ export const analyticsService = {
         )
       ),
     ];
-
     const cards =
       await prisma.card.findMany({
         where: {
           id: {
-            in: cardIds,
+            in:
+              cardIds,
           },
+
+          ...(
+            user.role ===
+              "SUPER_ADMIN"
+              ? {}
+              : {
+                store: {
+                  business: {
+                    ownerId:
+                      user.id,
+                  },
+                },
+              }
+          ),
         },
 
         select: {
-          id: true,
-          code: true,
-          label: true,
-          status: true,
+          id:
+            true,
+
+          code:
+            true,
+
+          label:
+            true,
+
+          status:
+            true,
 
           store: {
             select: {
-              id: true,
-              name: true,
+              id:
+                true,
+
+              name:
+                true,
 
               business: {
                 select: {
-                  id: true,
-                  name: true,
+                  id:
+                    true,
+
+                  name:
+                    true,
                 },
               },
             },
@@ -263,9 +172,17 @@ export const analyticsService = {
       });
 
     result.sort(
-      (a, b) =>
-        b.total -
-        a.total
+      (
+        a,
+        b
+      ) =>
+        (
+          b.total -
+          a.total
+        ) ||
+        a.id.localeCompare(
+          b.id
+        )
     );
 
     return {
@@ -325,6 +242,17 @@ export const analyticsService = {
           id: {
             in: storeIds,
           },
+          ...(
+            user.role ===
+              "SUPER_ADMIN"
+              ? {}
+              : {
+                business: {
+                  ownerId:
+                    user.id,
+                },
+              }
+          ),
         },
 
         select: {
@@ -392,9 +320,17 @@ export const analyticsService = {
       });
 
     result.sort(
-      (a, b) =>
-        b.total -
-        a.total
+      (
+        a,
+        b
+      ) =>
+        (
+          b.total -
+          a.total
+        ) ||
+        a.id.localeCompare(
+          b.id
+        )
     );
 
     return {
@@ -407,101 +343,8 @@ export const analyticsService = {
     };
   },
 
-  async timeline(
-    user: CurrentUser,
-    query: AnalyticsQuery
-  ) {
-    return dashboardTimeline(user, query)
-    // const {
-    //   from,
-    //   to,
-    // } =
-    //   getAnalyticsDateRange(
-    //     query
-    //   );
+  timeline: dashboardTimeline
 
-    // const interactions =
-    //   await prisma.interaction.findMany({
-    //     where:
-    //       buildInteractionWhere(
-    //         user,
-    //         query,
-    //         from,
-    //         to
-    //       ),
-
-    //     select: {
-    //       createdAt: true,
-    //       source: true,
-    //     },
-
-    //     orderBy: {
-    //       createdAt: "asc",
-    //     },
-    //   });
-
-    // const map =
-    //   new Map<
-    //     string,
-    //     {
-    //       date: string;
-    //       total: number;
-    //       nfc: number;
-    //       qr: number;
-    //       unknown: number;
-    //     }
-    //   >();
-
-    // for (
-    //   const interaction of
-    //   interactions
-    // ) {
-    //   const date =
-    //     interaction.createdAt
-    //       .toISOString()
-    //       .slice(0, 10);
-
-    //   if (!map.has(date)) {
-    //     map.set(date, {
-    //       date,
-    //       total: 0,
-    //       nfc: 0,
-    //       qr: 0,
-    //       unknown: 0,
-    //     });
-    //   }
-
-    //   const item =
-    //     map.get(date)!;
-
-    //   item.total += 1;
-
-    //   if (
-    //     interaction.source ===
-    //     "NFC"
-    //   ) {
-    //     item.nfc += 1;
-    //   } else if (
-    //     interaction.source ===
-    //     "QR"
-    //   ) {
-    //     item.qr += 1;
-    //   } else {
-    //     item.unknown += 1;
-    //   }
-    // }
-
-    // return {
-    //   period: {
-    //     from,
-    //     to,
-    //   },
-
-    //   timeline: Array.from(
-    //     map.values()
-    //   ),
-    // };
-  },
 };
 
 export async function getActionCenter(
@@ -1752,14 +1595,18 @@ export async function getStoreCardPerformance(
    * Sort strongest cards first
    * =====================================================
    */
-
   cardPerformance.sort(
     (
       a,
       b
     ) =>
-      b.meaningfulInteractions -
-      a.meaningfulInteractions
+      (
+        b.meaningfulInteractions -
+        a.meaningfulInteractions
+      ) ||
+      a.id.localeCompare(
+        b.id
+      )
   );
 
   /*
@@ -3781,14 +3628,18 @@ export async function getLocationPerformance(
    * Sort strongest locations first
    * =====================================================
    */
-
   locations.sort(
     (
       a,
       b
     ) =>
-      b.currentInteractions -
-      a.currentInteractions
+      (
+        b.currentInteractions -
+        a.currentInteractions
+      ) ||
+      a.id.localeCompare(
+        b.id
+      )
   );
 
   /*
@@ -3903,8 +3754,14 @@ export async function getLocationPerformance(
 }
 
 export async function getWeeklyReport(
-  storeId: string,
-  timeZone = "UTC"
+  storeId:
+    string,
+
+  timeZone =
+    "UTC",
+
+  referenceDate:
+    Date = new Date()
 ) {
   /*
    * =======================================================
@@ -3925,6 +3782,12 @@ export async function getWeeklyReport(
 
         name:
           true,
+
+        googleReviewUrl:
+          true,
+
+        googlePlaceId:
+          true,
       },
     });
 
@@ -3936,49 +3799,11 @@ export async function getWeeklyReport(
     );
   }
 
-  /*
-   * =======================================================
-   * Weekly analytics range
-   * =======================================================
-   *
-   * Weekly reports remain FIXED to 7 days.
-   *
-   * They are NOT affected by the custom range selected
-   * on the Analytics dashboard.
-   *
-   * We use the same backend range resolver used by the
-   * dashboard so:
-   *
-   * - timezone boundaries are correct
-   * - current period is correct
-   * - previous comparison period is correct
-   * - all analytics services receive exactly the same range
-   */
-
-  const today =
-    getDateKeyInTimeZone(
-      new Date(),
+  const range =
+    resolveWeeklyReportRange(
+      referenceDate,
       timeZone
     );
-
-  const from =
-    shiftDateKey(
-      today,
-      -6
-    );
-
-  const range =
-    resolveAnalyticsRangeQuery({
-      preset:
-        "7d",
-
-      from,
-
-      to:
-        today,
-
-      timeZone,
-    });
   /*
    * =======================================================
    * Reuse analytics services
@@ -3987,14 +3812,9 @@ export async function getWeeklyReport(
 
   const [
     engagement,
-
     patterns,
-
     cardPerformance,
-
     locationPerformance,
-
-    actionCenter,
   ] =
     await Promise.all([
       getStoreEngagementSummary(
@@ -4016,12 +3836,18 @@ export async function getWeeklyReport(
         storeId,
         range
       ),
-
-      getActionCenter(
-        storeId,
-        range
-      ),
     ]);
+
+  const actionCenter =
+    buildActionCenter({
+      store,
+
+      range,
+
+      cardPerformance,
+
+      locationPerformance,
+    });
 
   /*
    * =======================================================
@@ -4598,9 +4424,19 @@ export async function getDataReport(
         id: storeId,
       },
 
+
       select: {
-        id: true,
-        name: true,
+        id:
+          true,
+
+        name:
+          true,
+
+        googleReviewUrl:
+          true,
+
+        googlePlaceId:
+          true,
       },
     });
 
@@ -4624,7 +4460,6 @@ export async function getDataReport(
     patterns,
     cardPerformance,
     locationPerformance,
-    actionCenter,
   ] =
     await Promise.all([
       getStoreEngagementSummary(
@@ -4646,12 +4481,18 @@ export async function getDataReport(
         storeId,
         range
       ),
-
-      getActionCenter(
-        storeId,
-        range
-      ),
     ]);
+
+  const actionCenter =
+    buildActionCenter({
+      store,
+
+      range,
+
+      cardPerformance,
+
+      locationPerformance,
+    });
 
   /*
    * =======================================================

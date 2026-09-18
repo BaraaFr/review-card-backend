@@ -1,21 +1,99 @@
-import { normalizeTimeZone } from "./weekly-report-time.util.js";
-import { loadWeeklyReportContext, loadWeeklyReportMetrics } from "./business-weekly-report.data.js";
-import { buildBusinessWeeklyReport, buildEmptyWeeklyReport } from "./business-weekly-report.calculations.js";
+import {
+  normalizeTimeZone,
+} from "./weekly-report-time.util.js";
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+import {
+  loadWeeklyReportContext,
+  loadWeeklyReportMetrics,
+} from "./business-weekly-report.data.js";
 
-export async function getBusinessWeeklyReport(businessId: string, requestedTimeZone: string) {
-  const timeZone = normalizeTimeZone(requestedTimeZone);
-  const context = await loadWeeklyReportContext(businessId);
-  const now = new Date();
-  const currentFrom = new Date(now.getTime() - WEEK_MS);
-  const previousFrom = new Date(currentFrom.getTime() - WEEK_MS);
-  const period = { now, currentFrom, previousFrom, timeZone };
+import {
+  buildBusinessWeeklyReport,
+  buildEmptyWeeklyReport,
+} from "./business-weekly-report.calculations.js";
 
-  if (context.storeIds.length === 0) return buildEmptyWeeklyReport(context, period);
+import {
+  resolveWeeklyReportRange,
+} from "../../utils/weekly-report-range.js";
 
-  const metrics = await loadWeeklyReportMetrics(
-    context.storeIds, context.activeCardIds, currentFrom, previousFrom, now,
+export async function getBusinessWeeklyReport(
+  businessId: string,
+  requestedTimeZone: string,
+  referenceDate = new Date()
+) {
+  const timeZone =
+    normalizeTimeZone(
+      requestedTimeZone
+    );
+
+  const generatedAt =
+    new Date(
+      referenceDate
+    );
+
+  const range =
+    resolveWeeklyReportRange(
+      generatedAt,
+      timeZone
+    );
+
+  const context =
+    await loadWeeklyReportContext(
+      businessId
+    );
+
+  const period = {
+    generatedAt,
+
+    currentFrom:
+      range.fromUtc,
+
+    /*
+     * THIS MUST BE toExclusiveUtc.
+     *
+     * Do NOT use:
+     * range.fromUtc
+     * range.previousToExclusiveUtc
+     */
+    currentTo:
+      range.toExclusiveUtc,
+
+    previousFrom:
+      range.previousFromUtc,
+
+    previousTo:
+      range.previousToExclusiveUtc,
+
+    timeZone,
+  };
+
+  if (
+    context.storeIds.length ===
+    0
+  ) {
+    return buildEmptyWeeklyReport(
+      context,
+      period
+    );
+  }
+
+  const metrics =
+    await loadWeeklyReportMetrics(
+      context.storeIds,
+      context.activeCardIds,
+
+      range.fromUtc,
+      range.previousFromUtc,
+
+      /*
+       * Current range ends here.
+       */
+      range.toExclusiveUtc
+    );
+
+  return buildBusinessWeeklyReport(
+    context,
+    metrics,
+    period
   );
-  return buildBusinessWeeklyReport(context, metrics, period);
 }

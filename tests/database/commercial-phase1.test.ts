@@ -28,7 +28,7 @@ if (
  * Force Prisma to use the isolated
  * database for this process.
  */
-process.env.TEST_DATABASE_URL =
+process.env.DATABASE_URL =
   url;
 
 process.env.NODE_ENV =

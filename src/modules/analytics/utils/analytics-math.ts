@@ -112,9 +112,7 @@ export function calculateOverviewChangePercentage(
 
   previous:
     number
-):
-  number |
-  null {
+): number | null {
   const ratio =
     growthRatio(
       current,

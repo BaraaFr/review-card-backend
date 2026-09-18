@@ -88,7 +88,20 @@ export async function loadWeeklyReportContext(businessId: string) {
 }
 
 export async function loadWeeklyReportMetrics(
-  storeIds: string[], activeCardIds: string[], currentFrom: Date, previousFrom: Date, now: Date,
+  storeIds:
+    string[],
+
+  activeCardIds:
+    string[],
+
+  currentFrom:
+    Date,
+
+  previousFrom:
+    Date,
+
+  currentTo:
+    Date
 ) {
     const [
       currentCount,
@@ -120,7 +133,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+                currentTo,
             },
           },
         }),
@@ -171,7 +184,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+              currentTo,
             },
           },
   
@@ -207,7 +220,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+              currentTo,
             },
           },
   
@@ -239,7 +252,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+              currentTo,
             },
           },
   
@@ -303,7 +316,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+              currentTo,
             },
           },
   
@@ -355,7 +368,7 @@ export async function loadWeeklyReportMetrics(
                 currentFrom,
   
               lt:
-                now,
+              currentTo,
             },
           },
   

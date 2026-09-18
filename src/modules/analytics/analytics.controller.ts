@@ -5,10 +5,6 @@ import type {
 } from "express";
 
 import {
-  analyticsQuerySchema,
-} from "./analytics.schema.js";
-
-import {
   analyticsService,
   getActionCenter,
   getLocationPerformance,
@@ -785,6 +781,23 @@ export async function getWeeklyReportController(
 
           message:
             "Store not found.",
+        });
+    }
+
+    if (
+      error instanceof
+      AnalyticsRangeError
+    ) {
+      return res
+        .status(
+          400
+        )
+        .json({
+          success:
+            false,
+    
+          message:
+            error.message,
         });
     }
 

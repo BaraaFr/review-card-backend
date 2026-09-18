@@ -3,9 +3,10 @@
     "id": "b1",
     "name": "Business"
   },
+  "generatedAt": "2026-09-13T12:00:00.000Z",
   "period": {
     "from": "Sep 6, 2026",
-    "to": "Sep 13, 2026",
+    "to": "Sep 12, 2026",
     "timeZone": "Asia/Beirut"
   },
   "overview": {
@@ -15,8 +16,10 @@
     "uniqueVisitors": 0,
     "nfc": 0,
     "qr": 0,
+    "unknown": 0,
     "nfcPercentage": 0,
-    "qrPercentage": 0
+    "qrPercentage": 0,
+    "unknownPercentage": 0
   },
   "patterns": {
     "peakDay": null,

@@ -6,7 +6,7 @@
   "generatedAt": "2026-09-13T12:00:00.000Z",
   "period": {
     "from": "Sep 6, 2026",
-    "to": "Sep 13, 2026",
+    "to": "Sep 12, 2026",
     "timeZone": "Asia/Beirut"
   },
   "overview": {
@@ -16,8 +16,10 @@
     "uniqueVisitors": 2,
     "nfc": 7,
     "qr": 3,
+    "unknown": 0,
     "nfcPercentage": 70,
-    "qrPercentage": 30
+    "qrPercentage": 30,
+    "unknownPercentage": 0
   },
   "patterns": {
     "peakDay": {

@@ -63,85 +63,85 @@ export function getLocationName(
     );
 }
 export const buildInteractionWhere =
-  (
-    user:
-      CurrentUser,
+    (
+        user:
+            CurrentUser,
 
-    query:
-      AnalyticsQuery,
+        query:
+            AnalyticsQuery,
 
-    from:
-      Date,
+        from:
+            Date,
 
-    to:
-      Date
-  ) => {
-    return {
-      /*
-       * ===================================================
-       * Canonical meaningful-interaction definition
-       * ===================================================
-       */
-      isBot:
-        false,
+        to:
+            Date
+    ) => {
+        return {
+            /*
+             * ===================================================
+             * Canonical meaningful-interaction definition
+             * ===================================================
+             */
+            isBot:
+                false,
 
-      isDuplicate:
-        false,
+            isDuplicate:
+                false,
 
-      createdAt: {
-        gte:
-          from,
+            createdAt: {
+                gte:
+                    from,
 
-        lt:
-          to,
-      },
+                lt:
+                    to,
+            },
 
-      ...(
-        query.cardId
-          ? {
-              cardId:
-                query.cardId,
-            }
-          : {}
-      ),
+            ...(
+                query.cardId
+                    ? {
+                        cardId:
+                            query.cardId,
+                    }
+                    : {}
+            ),
 
-      ...(
-        query.storeId
-          ? {
-              storeId:
-                query.storeId,
-            }
-          : {}
-      ),
+            ...(
+                query.storeId
+                    ? {
+                        storeId:
+                            query.storeId,
+                    }
+                    : {}
+            ),
 
-      store: {
-        is: {
-          ...(
-            query.businessId
-              ? {
-                  businessId:
-                    query.businessId,
-                }
-              : {}
-          ),
+            store: {
+                is: {
+                    ...(
+                        query.businessId
+                            ? {
+                                businessId:
+                                    query.businessId,
+                            }
+                            : {}
+                    ),
 
-          ...(
-            user.role !==
-            "SUPER_ADMIN"
-              ? {
-                  business: {
-                    is: {
-                      ownerId:
-                        user.id,
-                    },
-                  },
-                }
-              : {}
-          ),
-        },
-      },
+                    ...(
+                        user.role !==
+                            "SUPER_ADMIN"
+                            ? {
+                                business: {
+                                    is: {
+                                        ownerId:
+                                            user.id,
+                                    },
+                                },
+                            }
+                            : {}
+                    ),
+                },
+            },
+        };
     };
-  };
 
 const DAY_MS =
     24 *

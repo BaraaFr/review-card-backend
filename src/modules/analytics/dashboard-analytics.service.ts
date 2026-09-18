@@ -28,22 +28,51 @@ import {
   } from "./types/index.js";
   
   function scope(
-    user:
-      CurrentUser,
-  
-    query:
-      AnalyticsQuery,
-  
-    from:
-      Date,
-  
-    to:
-      Date
+    user: CurrentUser,
+    query: AnalyticsQuery,
+    from: Date,
+    to: Date
   ) {
+    /*
+     * Prisma DateTime values in PostgreSQL are stored
+     * as TIMESTAMP WITHOUT TIME ZONE.
+     *
+     * ValYou treats those stored values as UTC.
+     *
+     * Raw SQL must therefore convert our absolute JS
+     * Date boundaries into UTC-naive PostgreSQL
+     * timestamps explicitly.
+     *
+     * Example:
+     *
+     * JS:
+     * 2026-09-12T21:00:00.000Z
+     *
+     * DB comparison value:
+     * 2026-09-12 21:00:00
+     *
+     * This avoids PostgreSQL applying the current
+     * database/session timezone implicitly.
+     */
+    const fromUtc =
+      from.toISOString();
+  
+    const toUtc =
+      to.toISOString();
+  
     const filters = [
       Prisma.sql`
-        i."createdAt" >= ${from}
-        AND i."createdAt" < ${to}
+        i."createdAt" >= (
+          ${fromUtc}::timestamptz
+          AT TIME ZONE 'UTC'
+        )
+  
+        AND
+  
+        i."createdAt" < (
+          ${toUtc}::timestamptz
+          AT TIME ZONE 'UTC'
+        )
       `,
     ];
   
