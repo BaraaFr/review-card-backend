@@ -100,3 +100,34 @@ export function startWeeklyReportScheduler() {
   timer.unref?.();
   console.log("Weekly report scheduler started");
 }
+
+export async function stopWeeklyReportScheduler() {
+  if (
+    timer
+  ) {
+    clearInterval(
+      timer
+    );
+  }
+
+  timer =
+    null;
+
+  /*
+   * Don't exit halfway through
+   * a scheduling scan.
+   */
+  while (
+    scanning
+  ) {
+    await new Promise(
+      (
+        resolve
+      ) =>
+        setTimeout(
+          resolve,
+          25
+        )
+    );
+  }
+}

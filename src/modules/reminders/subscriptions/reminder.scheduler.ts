@@ -174,3 +174,31 @@ import { enqueueSubscriptionReminder } from "./reminder.queue.js";
       "Subscription reminder scheduler started"
     );
   }
+
+  export async function stopSubscriptionReminderScheduler() {
+    if (
+      timer
+    ) {
+      clearInterval(
+        timer
+      );
+    }
+  
+    timer =
+      null;
+  
+    while (
+      scanning
+    ) {
+      await new Promise(
+        (
+          resolve
+        ) =>
+          setTimeout(
+            resolve,
+            25
+          )
+      );
+    }
+  }
+  

@@ -251,3 +251,19 @@ import { createRedisConnection } from "../../../lib/redis.js";
   
     return worker;
   }
+
+  export async function stopSubscriptionReminderWorker() {
+    if (
+      !worker
+    ) {
+      return;
+    }
+  
+    const current =
+      worker;
+  
+    worker =
+      null;
+  
+    await current.close();
+  }

@@ -1,38 +1,93 @@
 import "dotenv/config";
-import { z } from "zod";
 
-const envSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+import {
+  z,
+} from "zod";
 
-  PORT: z.coerce.number().default(4000),
+const envSchema =
+  z.object({
+    NODE_ENV:
+      z
+        .enum([
+          "development",
+          "test",
+          "production",
+        ])
+        .default(
+          "development"
+        ),
 
-  DATABASE_URL: z.string().min(1),
+    PORT:
+      z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(
+          4000
+        ),
 
-  JWT_SECRET: z.string().min(5),
+    DATABASE_URL:
+      z
+        .string()
+        .min(1),
 
-  FRONTEND_URL: z.string().url(),
+    JWT_SECRET:
+      z
+        .string()
+        .min(
+          32,
+          "JWT_SECRET must be at least 32 characters."
+        ),
 
-  PUBLIC_API_URL: z.string().url(),
+    FRONTEND_URL:
+      z
+        .string()
+        .url(),
 
-  COOKIE_DOMAIN: z.string().optional().default(""),
+    PUBLIC_API_URL:
+      z
+        .string()
+        .url(),
 
-  GOOGLE_PLACES_API_KEY: z.string(),
+    COOKIE_DOMAIN:
+      z
+        .string()
+        .optional()
+        .default(
+          ""
+        ),
 
-  ANALYTICS_SALT: z.string().min(32,"ANALYTICS_SALT must be at least 32 characters."
-),
-});
+    GOOGLE_PLACES_API_KEY:
+      z
+        .string()
+        .min(1),
 
-const result = envSchema.safeParse(process.env);
+    ANALYTICS_SALT:
+      z
+        .string()
+        .min(
+          32,
+          "ANALYTICS_SALT must be at least 32 characters."
+        ),
+  });
 
-if (!result.success) {
+const result =
+  envSchema.safeParse(
+    process.env
+  );
+
+if (
+  !result.success
+) {
   console.error(
     "Invalid environment variables:",
-    result.error.flatten().fieldErrors
+    result.error
+      .flatten()
+      .fieldErrors
   );
 
   process.exit(1);
 }
 
-export const env = result.data;
+export const env =
+  result.data;

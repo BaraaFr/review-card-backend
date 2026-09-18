@@ -11,6 +11,7 @@ import {
     sendTestWeeklyReportController,
     updateWeeklyReportSettingsController,
 } from "./weekly-report-settings.controller.js";
+import { sharedRateLimit } from "../../middleware/shared-rate-limit.js";
 
 const router =
     Router();
@@ -31,6 +32,20 @@ router.patch(
 
 router.post(
     "/:businessId/settings/test",
+    sharedRateLimit(
+        "test-email",
+    
+        3,
+    
+        60 *
+          60 *
+          1000,
+    
+        (
+          req
+        ) =>
+          req.user!.id
+      ),
     sendTestWeeklyReportController
 );
 

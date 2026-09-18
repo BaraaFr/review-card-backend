@@ -265,3 +265,19 @@ import {
   
     return worker;
   }
+
+  export async function stopWeeklyReportWorker() {
+    if (
+      !worker
+    ) {
+      return;
+    }
+  
+    const current =
+      worker;
+  
+    worker =
+      null;
+  
+    await current.close();
+  }

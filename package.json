@@ -4,15 +4,24 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "worker:dev": "tsx watch src/worker.ts",
+
+    "build": "prisma generate && tsc && node scripts/copy-prisma-engine.mjs",
+
     "start": "node dist/src/server.js",
+    "worker:start": "node dist/src/worker.js",
+
     "typecheck": "tsc --noEmit",
+
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+
     "test": "node --test tests/*.test.cjs",
-    "seed:super-admin": "tsx prisma/seed.ts",
-    "test:db": "tsx --test tests/database/*.test.ts"
+    "test:integration": "node --test tests/integration/*.test.cjs",
+    "test:db": "tsx --test tests/database/*.test.ts",
+
+    "seed:super-admin": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +31,6 @@
   "dependencies": {
     "@bull-board/api": "^9.10.1",
     "@bull-board/express": "^9.10.1",
-    "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",

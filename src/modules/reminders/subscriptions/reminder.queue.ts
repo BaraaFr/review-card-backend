@@ -16,7 +16,7 @@ export type SubscriptionReminderJobData = {
 };
 
 const queueConnection =
-    createRedisConnection();
+    createRedisConnection("producer");
 
 export const subscriptionReminderQueue =
     new Queue<SubscriptionReminderJobData>(

@@ -100,16 +100,23 @@ export const errorHandler:
         });
     }
 
+    /*
+     * Express body parsers may expose
+     * 4xx parsing errors.
+     *
+     * Never expose their body,
+     * stack or arbitrary diagnostic
+     * information.
+     */
     const requestError =
-      error as
-        | {
-            status?:
-              unknown;
+      error as {
+        status?:
+          unknown;
 
-            expose?:
-              unknown;
-          }
-        | null;
+        expose?:
+          unknown;
+      } |
+      null;
 
     if (
       requestError
