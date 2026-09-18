@@ -389,3 +389,46 @@ enum WeeklyReportDeliveryKind {
   WEEKLY
   TEST
 }
+
+model IdempotencyRecord {
+  actorId     String
+  key         String
+  requestHash String
+  response    Json
+  createdAt   DateTime @default(now())
+
+  @@id([actorId, key])
+  @@index([createdAt])
+}
+
+model PaymentRecord {
+  id               String @id @default(cuid())
+  businessId       String?
+  cardId           String?
+  subscriptionId   String?
+  kind             String
+  receiptReference String @unique
+  amountCents      Int
+  currency         String @default("USD")
+  paymentMethod    CardPaymentMethod
+  actorId          String
+  receivedAt       DateTime
+  details          Json?
+  createdAt        DateTime @default(now())
+
+  @@index([businessId, receivedAt])
+  @@index([cardId])
+  @@index([subscriptionId])
+}
+
+model AuditEvent {
+  id        String @id @default(cuid())
+  actorId   String
+  operation String
+  target    String
+  details   Json
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([target, createdAt])
+}

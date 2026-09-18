@@ -11,13 +11,22 @@ test('analytics crosses a page boundary without losing timestamp ties or double-
   const calls = [];
   const prisma = {
     store: { findUnique: async () => ({ id: 's' }) },
-    interaction: { findMany: async (query) => {
-      calls.push(query);
-      const after = query.where.OR?.[1].id.gt;
-      return rows.filter((row) => !after || row.id > after).slice(0, query.take);
-    } },
+    interaction: {
+      findMany: async (query) => {
+        calls.push(query);
+        const after = query.where.OR?.[1].id.gt;
+        return rows.filter((row) => !after || row.id > after).slice(0, query.take);
+      }
+    },
   };
-  const api = loadModule('src/modules/analytics/engagement-patterns.service.ts', { '../../lib/prisma.js': { prisma } });
+  const prismaMock = { prisma };
+  const api = loadModule(
+    'src/modules/analytics/analytics.service.ts',
+    {
+      '../../lib/prisma.js': prismaMock,
+      '../../../lib/prisma.js': prismaMock,
+    }
+  );
   const from = new Date('2026-09-12T21:00:00Z'), to = new Date('2026-09-13T21:00:00Z');
   const report = await api.getStoreEngagementPatterns('s', {
     preset: 'custom', from: '2026-09-13', to: '2026-09-13', days: 1,

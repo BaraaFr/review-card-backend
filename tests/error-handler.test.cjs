@@ -4,11 +4,11 @@ const { loadModule, response } = require('./load-module.cjs');
 
 test('invalid analytics ranges reach clients as JSON 400 responses', async () => {
   const cache = new Map();
-  const mocks = { './engagement-analytics.service.js': { getStoreEngagementSummary: async () => {
+  const mocks = { './analytics.service.js': { getStoreEngagementSummary: async () => {
     throw new Error('should not query invalid dates');
   } } };
   const { errorHandler } = loadModule('src/middleware/error.middleware.ts', mocks, cache);
-  const { getStoreEngagementSummaryController } = loadModule('src/modules/analytics/engagement-analytics.controller.ts', mocks, cache);
+  const { getStoreEngagementSummaryController } = loadModule('src/modules/analytics/analytics.controller.ts', mocks, cache);
   const res = response();
   await getStoreEngagementSummaryController({ params: { storeId: 's' }, query: {} }, res,
     (error) => errorHandler(error, {}, res, () => {}));

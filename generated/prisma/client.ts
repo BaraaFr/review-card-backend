@@ -99,3 +99,18 @@ export type AuthSession = Prisma.AuthSessionModel
  * 
  */
 export type AccountRequest = Prisma.AccountRequestModel
+/**
+ * Model IdempotencyRecord
+ * 
+ */
+export type IdempotencyRecord = Prisma.IdempotencyRecordModel
+/**
+ * Model PaymentRecord
+ * 
+ */
+export type PaymentRecord = Prisma.PaymentRecordModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
