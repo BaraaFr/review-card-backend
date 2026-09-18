@@ -1,6 +1,5 @@
 
 import { randomBytes } from "node:crypto";
-import { addDays, addMonths } from "date-fns";
 import { z } from "zod";
 import { PLAN_LIMITS } from "../../config/plans.js";
 import { CARD_PRICE_CENTS, TRIAL_DURATION_DAYS } from "../../config/commercial.js";
@@ -12,6 +11,88 @@ import type { CreateStoreInput } from "../stores/store.schema.js";
 import type { AssignCardInput, CreateCardInput } from "../cards/card.schema.js";
 import type { CreateAdditionalBusinessInput } from "../admin/customers/customer.schema.js";
 import { deliverySchema, paidPlanSchema, subscriptionStatusSchema } from "./commercial.schema.js";
+const DAY_MS =
+    24 *
+    60 *
+    60 *
+    1000;
+
+/*
+ * Commercial dates must never depend
+ * on the server's local timezone.
+ *
+ * A 30-day trial means exactly
+ * 30 × 24 hours.
+ */
+function addUtcDays(
+    date: Date,
+    days: number
+) {
+    return new Date(
+        date.getTime() +
+        days * DAY_MS
+    );
+}
+
+/*
+ * Adds calendar months using UTC while
+ * safely clamping month-end dates.
+ *
+ * Examples:
+ *
+ * Jan 15 + 1 month -> Feb 15
+ * Jan 31 + 1 month -> Feb 28/29
+ *
+ * The UTC time-of-day is preserved,
+ * so DST on the machine cannot add
+ * or remove an hour from billing.
+ */
+function addUtcMonths(
+    date: Date,
+    months: number
+) {
+    const result =
+        new Date(date);
+
+    const originalDay =
+        result.getUTCDate();
+
+    /*
+     * Move to day 1 first so changing
+     * the month cannot overflow.
+     */
+    result.setUTCDate(
+        1
+    );
+
+    result.setUTCMonth(
+        result.getUTCMonth() +
+        months
+    );
+
+    /*
+     * Number of days in the target
+     * UTC month.
+     */
+    const lastDay =
+        new Date(
+            Date.UTC(
+                result.getUTCFullYear(),
+                result.getUTCMonth() +
+                1,
+                0
+            )
+        ).getUTCDate();
+
+    result.setUTCDate(
+        Math.min(
+            originalDay,
+            lastDay
+        )
+    );
+
+    return result;
+}
 
 const current = (tx: Tx, businessId: string) => tx.subscription.findFirst({
     where: { businessId }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -211,7 +292,7 @@ export const commercialService = {
             await tx.subscription.updateMany({ where: { businessId, status: { in: ["ACTIVE", "TRIAL", "PAST_DUE"] } }, data: { status: "EXPIRED" } });
             const subscription = await tx.subscription.create({
                 data: {
-                    businessId, plan: "STARTER", status: "TRIAL", startsAt: now, expiresAt: addDays(now, TRIAL_DURATION_DAYS),
+                    businessId, plan: "STARTER", status: "TRIAL", startsAt: now, expiresAt: addUtcDays(now, TRIAL_DURATION_DAYS),
                 }
             });
             return { subscription };
@@ -233,8 +314,19 @@ export const commercialService = {
                 throw new DomainError(409, "UNLIMITED_SUBSCRIPTION", "An unlimited subscription cannot be renewed by adding months.");
             }
             const usable = !!existing && isSubscriptionUsable(existing);
-            const expiresAt = addMonths(usable && existing?.expiresAt ? existing.expiresAt : now, input.months);
-            const data = {
+            const renewalBase =
+                usable &&
+                    existing?.expiresAt
+                    ? existing.expiresAt
+                    : now;
+
+            const expiresAt =
+                addUtcMonths(
+                    renewalBase,
+                    input.months
+                );
+            
+                const data = {
                 plan: input.plan, status: "ACTIVE" as const,
                 startsAt: usable && existing ? existing.startsAt : now, expiresAt,
                 expiryReminderFor: null, expiryReminderSentAt: null

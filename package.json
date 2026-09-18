@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "test": "node --test tests/*.test.cjs",
-    "seed:super-admin": "tsx prisma/seed.ts"
+    "seed:super-admin": "tsx prisma/seed.ts",
+    "test:db": "tsx --test tests/database/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -49,13 +50,13 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.6.1",
     "@types/nodemailer": "^8.0.1",
     "@types/pdfkit": "^0.17.6",
     "@types/qrcode": "^1.5.6",
+    "esbuild": "^0.28.2",
     "prisma": "^6.19.3",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2",
-    "esbuild": "^0.28.2"
+    "typescript": "^7.0.2"
   }
 }
