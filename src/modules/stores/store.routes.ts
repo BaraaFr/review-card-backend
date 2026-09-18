@@ -1,21 +1,54 @@
 import { Router } from "express";
 
 import {
-  deleteStore,
+  removeStoreSafely,
+} from "../commercial/commercial.controller.js";
+
+import {
   getStore,
   updateStore,
 } from "./store.controller.js";
 
-import { authenticate } from "../../middleware/auth.middleware.js";
+import {
+  authenticate,
+} from "../../middleware/auth.middleware.js";
 
-const router = Router();
+const router =
+  Router();
 
-router.use(authenticate);
+router.use(
+  authenticate
+);
 
-router.get("/:id", getStore);
+/*
+ * Normal read.
+ */
+router.get(
+  "/:id",
+  getStore
+);
 
-router.patch("/:id", updateStore);
+/*
+ * Normal metadata update.
+ *
+ * Name/address/Google URL editing
+ * remains on the existing flow.
+ */
+router.patch(
+  "/:id",
+  updateStore
+);
 
-router.delete("/:id", deleteStore);
+/*
+ * COMMERCIAL MUTATION
+ *
+ * Hard deletion is only allowed when
+ * there are no cards and no interaction
+ * history attached to this location.
+ */
+router.delete(
+  "/:id",
+  removeStoreSafely
+);
 
 export default router;
