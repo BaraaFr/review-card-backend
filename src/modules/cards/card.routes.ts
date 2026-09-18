@@ -1,18 +1,18 @@
 import { Router } from "express";
 
 import {
-  assignCard,
-  createCard,
+  createCardSafely,
+  assignCardSafely,
+  unassignCardSafely,
+  deliverCardSafely,
+} from "../commercial/commercial.controller.js";
+
+import {
   getCard,
   getCardQr,
   getCards,
-  unassignCard,
   updateCard,
 } from "./card.controller.js";
-
-import {
-  deliverCardSafely,
-} from "../commercial/commercial.controller.js";
 
 import {
   authenticate,
@@ -27,18 +27,24 @@ const router = Router();
 router.use(authenticate);
 
 /*
- * Card creation still uses the old flow
- * for now.
+ * Inventory creation.
  *
- * We will migrate it after delivery has
- * been fully verified.
+ * Now protected by:
+ * - SUPER_ADMIN authorization
+ * - Idempotency-Key
+ * - Serializable transaction
+ * - AuditEvent
  */
 router.post(
   "/",
   authorize("SUPER_ADMIN"),
-  createCard
+  createCardSafely
 );
 
+/*
+ * Reads stay on the existing
+ * card controller/service.
+ */
 router.get(
   "/",
   getCards
@@ -54,36 +60,38 @@ router.get(
   getCard
 );
 
+/*
+ * Label editing is not a financial
+ * or provisioning mutation, so we
+ * leave the existing implementation.
+ */
 router.patch(
   "/:id",
   updateCard
 );
 
 /*
- * Assignment still uses the old flow
- * for this checkpoint.
+ * Physical inventory assignment.
  */
 router.post(
   "/:id/assign",
   authorize("SUPER_ADMIN"),
-  assignCard
-);
-
-router.post(
-  "/:id/unassign",
-  authorize("SUPER_ADMIN"),
-  unassignCard
+  assignCardSafely
 );
 
 /*
- * FIRST commercial mutation migrated:
+ * Physical inventory removal.
+ */
+router.post(
+  "/:id/unassign",
+  authorize("SUPER_ADMIN"),
+  unassignCardSafely
+);
+
+/*
+ * Payment + delivery.
  *
- * - requires Idempotency-Key
- * - requires receiptReference
- * - creates PaymentRecord
- * - creates AuditEvent
- * - stores idempotent response
- * - protects against duplicate delivery/payment
+ * Migrated in Phase 1B.1.
  */
 router.post(
   "/:id/deliver",
