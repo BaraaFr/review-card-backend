@@ -3,7 +3,6 @@ import { Router } from "express";
 import {
   assignCard,
   createCard,
-  deliverCard,
   getCard,
   getCardQr,
   getCards,
@@ -11,14 +10,29 @@ import {
   updateCard,
 } from "./card.controller.js";
 
-import { authenticate } from "../../middleware/auth.middleware.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import {
+  deliverCardSafely,
+} from "../commercial/commercial.controller.js";
+
+import {
+  authenticate,
+} from "../../middleware/auth.middleware.js";
+
+import {
+  authorize,
+} from "../../middleware/role.middleware.js";
 
 const router = Router();
 
 router.use(authenticate);
 
-// Only YOU create inventory.
+/*
+ * Card creation still uses the old flow
+ * for now.
+ *
+ * We will migrate it after delivery has
+ * been fully verified.
+ */
 router.post(
   "/",
   authorize("SUPER_ADMIN"),
@@ -45,7 +59,10 @@ router.patch(
   updateCard
 );
 
-// Only YOU assign physical inventory.
+/*
+ * Assignment still uses the old flow
+ * for this checkpoint.
+ */
 router.post(
   "/:id/assign",
   authorize("SUPER_ADMIN"),
@@ -58,11 +75,20 @@ router.post(
   unassignCard
 );
 
+/*
+ * FIRST commercial mutation migrated:
+ *
+ * - requires Idempotency-Key
+ * - requires receiptReference
+ * - creates PaymentRecord
+ * - creates AuditEvent
+ * - stores idempotent response
+ * - protects against duplicate delivery/payment
+ */
 router.post(
   "/:id/deliver",
-  authenticate,
   authorize("SUPER_ADMIN"),
-  deliverCard
+  deliverCardSafely
 );
 
 export default router;
