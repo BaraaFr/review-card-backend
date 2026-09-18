@@ -17,43 +17,6 @@ const DAY =
 
 const ACTIVATION_DAYS = 7;
 
-type SubscriptionSetup =
-  CreateCustomerInput["subscription"];
-
-function buildSubscriptionData(
-  setup: SubscriptionSetup
-) {
-  if (setup.mode === "NONE") {
-    return null;
-  }
-
-  if (setup.mode === "TRIAL") {
-    return {
-      plan: setup.plan,
-
-      status: "TRIAL" as const,
-
-      startsAt: new Date(),
-
-      expiresAt: new Date(
-        Date.now() +
-        setup.days * DAY
-      ),
-    };
-  }
-
-  return {
-    plan: setup.plan,
-
-    status: "ACTIVE" as const,
-
-    startsAt: new Date(),
-
-    expiresAt:
-      setup.expiresAt ?? null,
-  };
-}
-
 export const customerService = {
   async createCustomer(
     data: CreateCustomerInput
@@ -72,10 +35,6 @@ export const customerService = {
         ACTIVATION_DAYS * DAY
       );
 
-    const subscriptionData =
-      buildSubscriptionData(
-        data.subscription
-      );
 
     const result =
       await prisma.$transaction(
@@ -148,26 +107,12 @@ export const customerService = {
                 ownerId: user.id,
               },
             });
-
           /*
-           * Subscription is optional.
-           *
-           * Super Admin decides:
-           * TRIAL / ACTIVE / NONE.
+           * Provision subscription access
+           * separately through the audited
+           * trial/payment commercial actions.
            */
-          let subscription = null;
-
-          if (subscriptionData) {
-            subscription =
-              await tx.subscription.create({
-                data: {
-                  businessId:
-                    business.id,
-
-                  ...subscriptionData,
-                },
-              });
-          }
+          const subscription = null;
 
           /*
            * Only the hash is stored.
@@ -326,11 +271,6 @@ export const customerService = {
       );
     }
 
-    const subscriptionData =
-      buildSubscriptionData(
-        data.subscription
-      );
-
     return prisma.$transaction(
       async (tx) => {
         /*
@@ -381,20 +321,8 @@ export const customerService = {
         /*
          * 3. Optional subscription
          */
-        let subscription =
+        const subscription =
           null;
-
-        if (subscriptionData) {
-          subscription =
-            await tx.subscription.create({
-              data: {
-                businessId:
-                  business.id,
-
-                ...subscriptionData,
-              },
-            });
-        }
 
         return {
           business,
