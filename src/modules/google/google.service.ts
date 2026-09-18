@@ -11,6 +11,13 @@ import {
     hashGoogleReviewUrl,
     verifyGoogleConfirmationToken,
 } from "./google-confirmation-token.js";
+import {
+    googleFetch,
+  } from "./google-fetch.js";
+  
+  import {
+    DomainError,
+  } from "../../lib/domain-error.js";
 
 import {
     extractPlaceIdFromGoogleUrl,
@@ -274,7 +281,7 @@ async function getGooglePlaceIdentity(
     placeId: string
 ): Promise<GooglePlaceDetails> {
     const response =
-        await fetch(
+        await googleFetch(
             `${GOOGLE_PLACES_BASE_URL}/places/${encodeURIComponent(
                 placeId
             )}`,
@@ -319,11 +326,11 @@ async function getGooglePlaceIdentity(
     ) as GooglePlaceDetails;
 }
 
-export async function getGooglePlaceDetails(
+export async function fetchGooglePlaceDetails(
     placeId: string
 ): Promise<GooglePlaceDetails> {
     const response =
-        await fetch(
+        await googleFetch(
             `${GOOGLE_PLACES_BASE_URL}/places/${encodeURIComponent(
                 placeId
             )}`,
@@ -378,7 +385,7 @@ async function searchGoogleCandidates(
     GooglePlaceSearchResult[]
 > {
     const response =
-        await fetch(
+        await googleFetch(
             `${GOOGLE_PLACES_BASE_URL}/places:searchText`,
             {
                 method: "POST",
@@ -478,91 +485,183 @@ async function resolvePlaceIdFromGoogleUrl(
 
 async function saveGoogleConnection(
     store: {
-        id: string;
-
-        name: string;
-
-        googleReviewUrl:
+      id:
+        string;
+  
+      updatedAt:
+        Date;
+  
+      name:
+        string;
+  
+      googleReviewUrl:
         | string
         | null;
     },
-    place: GooglePlaceDetails,
+  
+    place:
+      GooglePlaceDetails,
+  
     mode:
-        | "EXACT_URL"
-        | "CONFIRMED"
-): Promise<GoogleConnectedResult> {
+      | "EXACT_URL"
+      | "CONFIRMED",
+  
+    actorId:
+      string
+  ): Promise<GoogleConnectedResult> {
     if (
-        !store.googleReviewUrl
+      !store.googleReviewUrl
     ) {
-        throw new Error(
-            "GOOGLE_REVIEW_URL_REQUIRED"
-        );
+      throw new Error(
+        "GOOGLE_REVIEW_URL_REQUIRED"
+      );
     }
-
+  
     const now =
-        new Date();
-
+      new Date();
+  
     const updatedStore =
-        await prisma.store.update({
-            where: {
-                id:
+      await prisma
+        .$transaction(
+          async (
+            tx
+          ) => {
+            /*
+             * Optimistic concurrency check.
+             *
+             * If store.updatedAt or the Google URL
+             * changed since we started talking to
+             * Google, this update fails.
+             */
+            const updated =
+              await tx.store
+                .update({
+                  where: {
+                    id:
+                      store.id,
+  
+                    updatedAt:
+                      store.updatedAt,
+  
+                    googleReviewUrl:
+                      store.googleReviewUrl,
+                  },
+  
+                  data: {
+                    googlePlaceId:
+                      place.id,
+  
+                    googlePlaceConnectedFromUrl:
+                      store.googleReviewUrl,
+  
+                    googlePlaceConnectedAt:
+                      now,
+                  },
+                });
+  
+            /*
+             * Administrative/security audit.
+             */
+            await tx.auditEvent
+              .create({
+                data: {
+                  actorId,
+  
+                  operation:
+                    "GOOGLE_CONNECT",
+  
+                  target:
                     store.id,
-            },
-
-            data: {
-                googlePlaceId:
-                    place.id,
-
-                googlePlaceConnectedFromUrl:
-                    store.googleReviewUrl,
-
-                googlePlaceConnectedAt:
-                    now,
-            },
-        });
-
+  
+                  details: {
+                    placeId:
+                      place.id,
+  
+                    reviewUrl:
+                      store.googleReviewUrl,
+  
+                    mode,
+                  },
+                },
+              });
+  
+            return updated;
+          }
+        )
+        .catch(
+          (
+            error:
+              unknown
+          ) => {
+            /*
+             * Prisma update couldn't find
+             * a row matching the original
+             * state.
+             */
+            if (
+              (
+                error as {
+                  code?:
+                    string;
+                }
+              ).code ===
+                "P2025"
+            ) {
+              throw new DomainError(
+                409,
+  
+                "GOOGLE_CONFIRMATION_STALE",
+  
+                "Location changed while connecting. Please connect again."
+              );
+            }
+  
+            throw error;
+          }
+        );
+  
     return {
-        status:
-            "CONNECTED",
-
-        connectionMode:
-            mode,
-
-        store: {
-            id:
-                updatedStore.id,
-
-            name:
-                updatedStore.name,
-
-            googleReviewUrl:
-                updatedStore.googleReviewUrl,
-
-            googlePlaceId:
-                updatedStore.googlePlaceId,
-
-            googlePlaceConnectedFromUrl:
-                updatedStore.googlePlaceConnectedFromUrl,
-
-            googlePlaceConnectedAt:
-                updatedStore.googlePlaceConnectedAt,
-        },
-
-        googlePlace: {
-            id:
-                place.id,
-
-            name:
-                place.displayName
-                    ?.text ??
-                null,
-
-            address:
-                place.formattedAddress ??
-                null,
-        },
+      status:
+        "CONNECTED",
+  
+      connectionMode:
+        mode,
+  
+      store: {
+        id:
+          updatedStore.id,
+  
+        name:
+          updatedStore.name,
+  
+        googleReviewUrl:
+          updatedStore.googleReviewUrl,
+  
+        googlePlaceId:
+          updatedStore.googlePlaceId,
+  
+        googlePlaceConnectedFromUrl:
+          updatedStore.googlePlaceConnectedFromUrl,
+  
+        googlePlaceConnectedAt:
+          updatedStore.googlePlaceConnectedAt,
+      },
+  
+      googlePlace: {
+        id:
+          place.id,
+  
+        name:
+          place.displayName
+            ?.text ??
+          null,
+  
+        address:
+          place.formattedAddress ??
+          null,
+      },
     };
-}
+  }
 
 function toCandidate(
     place:
@@ -628,7 +727,8 @@ export async function connectGooglePlace(
         return saveGoogleConnection(
             store,
             place,
-            "EXACT_URL"
+            "EXACT_URL",
+            user.id
         );
     }
 
@@ -697,7 +797,8 @@ export async function connectGooglePlace(
             return saveGoogleConnection(
                 store,
                 exactPlace,
-                "EXACT_URL"
+                "EXACT_URL",
+                user.id
             );
         }
 
@@ -991,7 +1092,8 @@ export async function confirmGooglePlace(
     return saveGoogleConnection(
         store,
         place,
-        "CONFIRMED"
+        "CONFIRMED",
+        input.user.id
     );
 }
 
@@ -1203,91 +1305,122 @@ export async function disconnectGooglePlace(
         );
     }
 
-    /*
-     * Already disconnected.
-     *
-     * Keep endpoint idempotent.
-     */
-    if (
-        !store.googlePlaceId &&
-        !store.googlePlaceConnectedFromUrl &&
-        !store.googlePlaceConnectedAt
-    ) {
-        return {
-            alreadyDisconnected:
-                true,
+    const alreadyDisconnected =
+  !store.googlePlaceId &&
+  !store.googlePlaceConnectedFromUrl &&
+  !store.googlePlaceConnectedAt;
 
-            store: {
+  const updatedStore =
+  await prisma
+    .$transaction(
+      async (
+        tx
+      ) => {
+        const updated =
+          await tx.store
+            .update({
+              where: {
                 id:
-                    store.id,
+                  store.id,
+              },
 
-                name:
-                    store.name,
-
-                googleReviewUrl:
-                    store.googleReviewUrl,
-
+              data: {
                 googlePlaceId:
-                    null,
+                  null,
 
                 googlePlaceConnectedFromUrl:
-                    null,
+                  null,
 
                 googlePlaceConnectedAt:
-                    null,
-            },
-        };
-    }
+                  null,
+              },
+            });
 
-    /*
-     * IMPORTANT:
-     *
-     * googleReviewUrl is NOT cleared.
-     *
-     * Physical NFC/QR redirects must
-     * continue working.
-     */
-    const updatedStore =
-        await prisma.store.update({
-            where: {
-                id:
-                    store.id,
-            },
-
+        await tx.auditEvent
+          .create({
             data: {
-                googlePlaceId:
-                    null,
+              actorId:
+                user.id,
 
-                googlePlaceConnectedFromUrl:
-                    null,
+              operation:
+                "GOOGLE_DISCONNECT",
 
-                googlePlaceConnectedAt:
-                    null,
+              target:
+                store.id,
+
+              details: {
+                previousPlaceId:
+                  store.googlePlaceId,
+              },
             },
-        });
+          });
 
-    return {
-        alreadyDisconnected:
-            false,
+        return updated;
+      }
+    );
 
-        store: {
-            id:
-                updatedStore.id,
+return {
+  alreadyDisconnected,
 
-            name:
-                updatedStore.name,
+  store: {
+    id:
+      updatedStore.id,
 
-            googleReviewUrl:
-                updatedStore.googleReviewUrl,
+    name:
+      updatedStore.name,
 
-            googlePlaceId:
-                updatedStore.googlePlaceId,
+    googleReviewUrl:
+      updatedStore.googleReviewUrl,
 
-            googlePlaceConnectedFromUrl:
-                updatedStore.googlePlaceConnectedFromUrl,
+    googlePlaceId:
+      updatedStore.googlePlaceId,
 
-            googlePlaceConnectedAt:
-                updatedStore.googlePlaceConnectedAt,
-        },
-    };
+    googlePlaceConnectedFromUrl:
+      updatedStore.googlePlaceConnectedFromUrl,
+
+    googlePlaceConnectedAt:
+      updatedStore.googlePlaceConnectedAt,
+  },
+};
+
+}
+
+const inFlightDetails =
+  new Map<
+    string,
+    Promise<GooglePlaceDetails>
+  >();
+
+export function getGooglePlaceDetails(
+  placeId:
+    string
+): Promise<GooglePlaceDetails> {
+  const existing =
+    inFlightDetails.get(
+      placeId
+    );
+
+  if (
+    existing
+  ) {
+    return existing;
+  }
+
+  const request =
+    fetchGooglePlaceDetails(
+      placeId
+    ).finally(
+      () => {
+        inFlightDetails.delete(
+          placeId
+        );
+      }
+    );
+
+  inFlightDetails.set(
+    placeId,
+    request
+  );
+
+  return request;
 }

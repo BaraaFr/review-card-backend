@@ -39,22 +39,61 @@ export function isAllowedGoogleHostname(
 }
 
 export function validateGoogleUrl(
-  value: string
+  value:
+    string
 ) {
-  let url: URL;
+  let url:
+    URL;
 
   try {
     url =
-      new URL(value);
+      new URL(
+        value
+      );
   } catch {
     throw new Error(
       "INVALID_GOOGLE_REVIEW_URL"
     );
   }
 
+  /*
+   * HTTPS only.
+   */
   if (
     url.protocol !==
     "https:"
+  ) {
+    throw new Error(
+      "INVALID_GOOGLE_REVIEW_URL"
+    );
+  }
+
+  /*
+   * Never allow URLs like:
+   *
+   * https://user:pass@google.com
+   */
+  if (
+    url.username !==
+    "" ||
+    url.password !==
+    ""
+  ) {
+    throw new Error(
+      "INVALID_GOOGLE_REVIEW_URL"
+    );
+  }
+
+  /*
+   * Don't allow unexpected ports:
+   *
+   * https://google.com:8443
+   */
+  if (
+    url.port !==
+    "" &&
+    url.port !==
+    "443"
   ) {
     throw new Error(
       "INVALID_GOOGLE_REVIEW_URL"
@@ -73,7 +112,6 @@ export function validateGoogleUrl(
 
   return url;
 }
-
 export function extractPlaceIdFromGoogleUrl(
   value: string
 ): string | null {
@@ -160,10 +198,13 @@ export async function resolveGoogleUrl(
 
           headers: {
             "User-Agent":
-              "TapReview/1.0",
+              "ValYou/1.0",
           },
         }
       );
+
+    await response.body
+      ?.cancel();
 
     if (
       response.status < 300 ||

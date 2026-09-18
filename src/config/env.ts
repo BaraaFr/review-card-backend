@@ -62,6 +62,13 @@ const envSchema =
         .string()
         .min(1),
 
+    GOOGLE_API_DAILY_LIMIT:
+      z.coerce
+        .number()
+        .int()
+        .min(1)
+        .default(200),
+
     ANALYTICS_SALT:
       z
         .string()

@@ -35,6 +35,7 @@ export async function loginController(req: Request, res: Response, next: NextFun
     res.setHeader("Cache-Control", "no-store");
     return res.json({ success: true, message: "Logged in successfully.", user });
   } catch (error) {
+      console.log("error",error)
     return handleAuthError(error, res, next);
   }
 }
