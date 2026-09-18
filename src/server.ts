@@ -25,6 +25,14 @@ import {
   subscriptionReminderQueue,
 } from "./modules/reminders/subscriptions/reminder.queue.js";
 
+import {
+  closeLoginRateLimit,
+} from "./modules/auth/login-rate-limit.js";
+
+import {
+  closePasswordResetRateLimit,
+} from "./modules/auth/password-reset-rate-limit.js";
+
 const server =
   app.listen(
     env.PORT,
@@ -126,6 +134,10 @@ async function shutdown() {
     closeRedisConnections();
 
     closeRequestRedis();
+    
+    closeLoginRateLimit();
+    
+    closePasswordResetRateLimit();
 
     await prisma
       .$disconnect();

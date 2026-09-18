@@ -3,6 +3,10 @@ import {
 } from "express";
 
 import {
+  sharedRateLimit,
+} from "../../middleware/shared-rate-limit.js";
+
+import {
   loginRateLimit,
 } from "./login-rate-limit.js";
 
@@ -36,18 +40,39 @@ const router =
 
 /*
  * =========================================================
- * Public authentication routes
+ * Login
  * =========================================================
+ *
+ * Custom Redis limiter:
+ *
+ * - IP budget
+ * - account/email budget
  */
-
 router.post(
   "/login",
+
   loginRateLimit,
+
   loginController
 );
 
+/*
+ * =========================================================
+ * Account activation
+ * =========================================================
+ *
+ * Activation tokens are strong random secrets,
+ * but this still prevents brute-force traffic.
+ */
 router.post(
   "/activate-account",
+
+  sharedRateLimit(
+    "activation",
+    20,
+    15 * 60 * 1000
+  ),
+
   activateAccountController
 );
 
@@ -59,26 +84,39 @@ router.post(
 
 router.post(
   "/forgot-password",
+
   forgotPasswordRateLimit,
+
   forgotPasswordController
 );
 
 router.post(
   "/reset-password",
+
   resetPasswordRateLimit,
+
   resetPasswordController
 );
 
 /*
  * =========================================================
- * Session refresh
+ * Refresh
  * =========================================================
  *
- * Refresh does NOT require a valid access token.
+ * Refresh does not require a valid access JWT.
+ *
+ * Redis prevents a client from hammering
+ * refresh-token rotation.
  */
-
 router.post(
   "/refresh",
+
+  sharedRateLimit(
+    "refresh",
+    120,
+    15 * 60 * 1000
+  ),
+
   refreshSessionController
 );
 
@@ -86,12 +124,11 @@ router.post(
  * =========================================================
  * Logout
  * =========================================================
- *
- * The refresh cookie identifies the session.
  */
 
 router.post(
   "/logout",
+
   logoutController
 );
 
@@ -103,7 +140,9 @@ router.post(
 
 router.get(
   "/me",
+
   authenticate,
+
   meController
 );
 

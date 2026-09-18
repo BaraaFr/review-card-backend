@@ -23,19 +23,23 @@ import {
   const REFRESH_ABSOLUTE_DAYS =
     365;
   
+    const DAY_MS =
+    24 *
+    60 *
+    60 *
+    1000;
+  
   function addDays(
-    date: Date,
-    days: number
+    date:
+      Date,
+  
+    days:
+      number
   ) {
-    const result =
-      new Date(date);
-  
-    result.setDate(
-      result.getDate() +
-        days
+    return new Date(
+      date.getTime() +
+        days * DAY_MS
     );
-  
-    return result;
   }
   
   function minimumDate(

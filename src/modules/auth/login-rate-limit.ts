@@ -83,3 +83,13 @@ export const loginRateLimit: RequestHandler = async (req, res, next) => {
     });
   }
 };
+
+export function closeLoginRateLimit() {
+  client?.disconnect();
+
+  client =
+    undefined;
+
+  ready =
+    undefined;
+}

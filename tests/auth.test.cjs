@@ -79,3 +79,95 @@ test('invalid invitations and disabled/active users cannot change a password', a
     assert.equal(res.body.code, code);
   }
 });
+
+test(
+  "wrong passwords never reveal whether an account is disabled or pending",
+  async () => {
+    const records = [
+      {
+        ...user,
+
+        passwordHash:
+          "hash",
+
+        status:
+          "DISABLED",
+      },
+
+      {
+        ...user,
+
+        passwordHash:
+          "hash",
+
+        status:
+          "PENDING",
+      },
+
+      null,
+    ];
+
+    for (
+      const record
+      of records
+    ) {
+      let comparisons =
+        0;
+
+      const api =
+        subject(
+          {
+            user: {
+              findUnique:
+                async () =>
+                  record,
+            },
+          },
+
+          {
+            compare:
+              async () => {
+                comparisons++;
+
+                return false;
+              },
+
+            hash:
+              async () =>
+                "new-hash",
+          }
+        );
+
+      const res =
+        response();
+
+      await api.loginController(
+        loginRequest,
+
+        res,
+
+        unexpected
+      );
+
+      assert.equal(
+        res.statusCode,
+        401
+      );
+
+      assert.equal(
+        res.body.code,
+        "INVALID_CREDENTIALS"
+      );
+
+      /*
+       * Even nonexistent users execute
+       * a bcrypt comparison against
+       * the dummy hash.
+       */
+      assert.equal(
+        comparisons,
+        1
+      );
+    }
+  }
+);
