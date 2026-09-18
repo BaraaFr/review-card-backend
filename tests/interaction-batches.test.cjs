@@ -24,7 +24,24 @@ test('analytics crosses a page boundary without losing timestamp ties or double-
     'src/modules/analytics/analytics.service.ts',
     {
       '../../lib/prisma.js': prismaMock,
+  
       '../../../lib/prisma.js': prismaMock,
+  
+      './dashboard-analytics.service.js': {
+        dashboardOverview:
+          async () => {
+            throw new Error(
+              'dashboardOverview should not be called by this test'
+            );
+          },
+  
+        dashboardTimeline:
+          async () => {
+            throw new Error(
+              'dashboardTimeline should not be called by this test'
+            );
+          },
+      },
     }
   );
   const from = new Date('2026-09-12T21:00:00Z'), to = new Date('2026-09-13T21:00:00Z');

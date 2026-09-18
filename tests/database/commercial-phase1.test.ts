@@ -9,7 +9,7 @@ import {
 } from "node:crypto";
 
 const url =
-  process.env.DATABASE_URL;
+  process.env.TEST_DATABASE_URL;
 
 if (
   !url ||
@@ -28,7 +28,7 @@ if (
  * Force Prisma to use the isolated
  * database for this process.
  */
-process.env.DATABASE_URL =
+process.env.TEST_DATABASE_URL =
   url;
 
 process.env.NODE_ENV =

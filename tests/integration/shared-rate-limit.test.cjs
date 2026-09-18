@@ -10,13 +10,12 @@ const assert =
 
 const {
   randomUUID,
-  createHash,
 } =
   require(
     "node:crypto"
   );
 
-const Redis =
+const RealRedis =
   require(
     "ioredis"
   );
@@ -28,13 +27,20 @@ const {
     "../load-module.cjs"
   );
 
-const testUrl ="redis://localhost:6379/15";
+const socket =
+  process.env
+    .TEST_REDIS_SOCKET;
+
+const testUrl =
+  process.env
+    .TEST_REDIS_URL;
 
 test(
-  "Redis atomically enforces shared limits across concurrent requests",
+  "Redis atomically enforces account/IP budgets across API instances and expires counters",
 
   {
     skip:
+      !socket &&
       !testUrl,
   },
 
@@ -42,121 +48,170 @@ test(
     t
   ) => {
     /*
-     * Protect against accidentally
-     * pointing this test at a remote
-     * or production Redis server.
+     * =====================================================
+     * Protect against production Redis
+     * =====================================================
      */
-    const parsed =
-      new URL(
-        testUrl
+
+    if (
+      socket
+    ) {
+      assert.ok(
+        socket.startsWith(
+          "/private/tmp/"
+        ) ||
+        socket.startsWith(
+          "/tmp/"
+        ),
+
+        "TEST_REDIS_SOCKET must point to a local temporary socket."
+      );
+    } else {
+      const parsed =
+        new URL(
+          testUrl
+        );
+
+      assert.ok(
+        [
+          "localhost",
+          "127.0.0.1",
+          "[::1]",
+        ].includes(
+          parsed.hostname
+        ),
+
+        "TEST_REDIS_URL must point to local Redis."
       );
 
-    assert.ok(
-      [
-        "localhost",
-        "127.0.0.1",
-        "[::1]",
-      ].includes(
-        parsed.hostname
-      ),
+      assert.equal(
+        parsed.protocol,
+        "redis:"
+      );
 
-      "TEST_REDIS_URL must be local."
-    );
+      assert.equal(
+        parsed.pathname,
+        "/15",
 
-    assert.equal(
-      parsed.protocol,
-      "redis:"
-    );
+        "Use Redis database 15 for integration tests."
+      );
+    }
 
-    assert.equal(
-      parsed.pathname,
-      "/15",
+    const endpoint =
+      socket ||
+      testUrl;
 
-      "Use isolated Redis database 15 for tests."
-    );
+    /*
+     * Each test run gets its own prefix.
+     *
+     * This prevents:
+     *
+     * previous failed tests
+     * parallel test runs
+     * local dev counters
+     *
+     * from affecting this test.
+     */
+    const prefix =
+      `test-${randomUUID()}:`;
 
-    const oldRedisUrl =
+    const oldUrl =
       process.env
         .REDIS_URL;
 
     /*
-     * Production requestRedis reads
-     * REDIS_URL. Point it at the
-     * explicitly isolated test Redis
-     * for this process.
+     * login-rate-limit.ts reads REDIS_URL,
+     * but our mocked Redis constructor below
+     * controls the real endpoint.
      */
     process.env.REDIS_URL =
-      testUrl;
+      "redis://unused.invalid";
 
-    const namespace =
-      `phase2-${randomUUID()}`;
-
-    const subject =
-      `client-${randomUUID()}`;
-
-    const hash =
-      createHash(
-        "sha256"
-      )
-        .update(
-          subject
-        )
-        .digest(
-          "hex"
-        );
-
-    const expectedKey =
-      `valyou:limit:${namespace}:${hash}`;
-
-    const observer =
-      new Redis(
-        testUrl
-      );
-
-    const cache =
-      new Map();
-
-    const {
-      consumeLimit,
-    } =
-      loadModule(
-        "src/middleware/shared-rate-limit.ts",
-
-        {},
-
-        cache
-      );
+    const clients =
+      [];
 
     /*
-     * Retrieve the exact requestRedis
-     * module instance that
-     * shared-rate-limit loaded.
+     * Observer has NO key prefix.
+     *
+     * We use it for test inspection and cleanup.
      */
-    const {
-      closeRequestRedis,
-    } =
-      loadModule(
-        "src/lib/request-redis.ts",
-
-        {},
-
-        cache
+    const observer =
+      new RealRedis(
+        endpoint
       );
+
+    observer.on(
+      "error",
+      () => {}
+    );
+
+    /*
+     * Every Redis connection created by the
+     * login limiter gets this test-specific prefix.
+     */
+    class Redis
+      extends RealRedis {
+      constructor(
+        _url,
+        options
+      ) {
+        super(
+          endpoint,
+          {
+            ...options,
+
+            keyPrefix:
+              prefix,
+          }
+        );
+
+        this.on(
+          "error",
+          () => {}
+        );
+
+        clients.push(
+          this
+        );
+      }
+    }
 
     t.after(
       async () => {
-        await observer
-          .del(
-            expectedKey
+        /*
+         * Delete every key created by this
+         * specific test run.
+         */
+        const keys =
+          await observer.keys(
+            `${prefix}*`
           );
 
-        closeRequestRedis();
+        if (
+          keys.length
+        ) {
+          await observer.del(
+            ...keys
+          );
+        }
+
+        await Promise.allSettled(
+          clients.map(
+            (
+              client
+            ) =>
+              client.quit()
+          )
+        );
 
         await observer
-          .quit();
+          .quit()
+          .catch(
+            () => {}
+          );
 
         if (
-          oldRedisUrl ===
+          oldUrl ===
           undefined
         ) {
           delete process
@@ -165,18 +220,61 @@ test(
         } else {
           process.env
             .REDIS_URL =
-            oldRedisUrl;
+            oldUrl;
         }
       }
     );
 
     /*
-     * Fire twenty operations at the
-     * same limiter concurrently.
+     * =====================================================
+     * Simulate two API instances
+     * =====================================================
      *
-     * Exactly five may enter.
+     * Each loadModule call creates a separate
+     * module instance with a separate Redis client.
+     *
+     * Redis must remain the shared source of truth.
      */
-    const results =
+
+    const first =
+      loadModule(
+        "src/modules/auth/login-rate-limit.ts",
+
+        {
+          ioredis: {
+            default:
+              Redis,
+          },
+        }
+      );
+
+    const second =
+      loadModule(
+        "src/modules/auth/login-rate-limit.ts",
+
+        {
+          ioredis: {
+            default:
+              Redis,
+          },
+        }
+      );
+
+    /*
+     * =====================================================
+     * Account limit
+     * =====================================================
+     *
+     * Same account
+     * different IPs
+     *
+     * Account budget = 10.
+     */
+
+    const email =
+      `parallel-${Date.now()}@example.com`;
+
+    const attempts =
       await Promise.all(
         Array.from(
           {
@@ -184,103 +282,174 @@ test(
               20,
           },
 
-          () =>
-            consumeLimit(
-              namespace,
-
-              subject,
-
-              5,
-
-              60_000
+          (
+            _,
+            index
+          ) =>
+            (
+              index %
+                2
+                ? first
+                : second
             )
+              .consumeLoginAttempt(
+                `192.0.2.${index + 1}`,
+
+                email
+              )
         )
       );
 
-    const allowed =
-      results.filter(
+    const accountAllowed =
+      attempts.filter(
         (
-          retryAfter
+          result
         ) =>
-          retryAfter ===
-          0
+          result.allowed
       );
 
-    const blocked =
-      results.filter(
+    const accountBlocked =
+      attempts.filter(
         (
-          retryAfter
+          result
         ) =>
-          retryAfter >
-          0
+          !result.allowed
       );
 
     assert.equal(
-      allowed.length,
-      5
+      accountAllowed.length,
+      10
     );
 
     assert.equal(
-      blocked.length,
-      15
+      accountBlocked.length,
+      10
     );
 
     assert.ok(
-      blocked.every(
+      accountBlocked.every(
         (
-          value
+          result
         ) =>
-          value >
-          0 &&
-          value <=
-            60
+          result
+            .retryAfterSeconds >
+          0
       )
     );
 
     /*
-     * Counter is shared/atomic.
+     * =====================================================
+     * IP limit
+     * =====================================================
+     *
+     * Same IP
+     * unique accounts
+     *
+     * IP budget = 100.
      */
-    assert.equal(
-      await observer.get(
-        expectedKey
-      ),
-      "5"
-    );
 
-    /*
-     * Counter must expire.
-     */
-    const ttl =
-      await observer.pttl(
-        expectedKey
-      );
+    const ipAttempts =
+      await Promise.all(
+        Array.from(
+          {
+            length:
+              101,
+          },
 
-    assert.ok(
-      ttl >
-        0 &&
-      ttl <=
-        60_000
-    );
+          (
+            _,
+            index
+          ) =>
+            first
+              .consumeLoginAttempt(
+                "198.51.100.1",
 
-    /*
-     * Raw identities must never
-     * appear in Redis keys.
-     */
-    const keys =
-      await observer.keys(
-        `valyou:limit:${namespace}:*`
+                `ip-${Date.now()}-${index}@example.com`
+              )
+        )
       );
 
     assert.equal(
-      keys.length,
+      ipAttempts.filter(
+        (
+          result
+        ) =>
+          result.allowed
+      ).length,
+
+      100
+    );
+
+    assert.equal(
+      ipAttempts.filter(
+        (
+          result
+        ) =>
+          !result.allowed
+      ).length,
+
       1
     );
 
-    assert.equal(
-      keys[0].includes(
-        subject
-      ),
-      false
+    /*
+     * =====================================================
+     * Inspect Redis
+     * =====================================================
+     */
+
+    const keys =
+      await observer.keys(
+        `${prefix}auth:login:*`
+      );
+
+    assert.ok(
+      keys.length >
+        0
+    );
+
+    /*
+     * Counters must expire.
+     */
+    const expirations =
+      await Promise.all(
+        keys.map(
+          (
+            key
+          ) =>
+            observer.pttl(
+              key
+            )
+        )
+      );
+
+    assert.ok(
+      expirations.every(
+        (
+          ttl
+        ) =>
+          ttl >
+            0 &&
+          ttl <=
+            900_000
+      )
+    );
+
+    /*
+     * Emails and IPs must never appear
+     * directly inside Redis keys.
+     */
+    assert.ok(
+      keys.every(
+        (
+          key
+        ) =>
+          !key.includes(
+            "@"
+          ) &&
+          !key.includes(
+            "198.51.100.1"
+          )
+      )
     );
   }
 );

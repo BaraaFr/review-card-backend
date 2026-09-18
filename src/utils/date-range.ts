@@ -1,104 +1,178 @@
-import type { AnalyticsQuery } from "../modules/analytics/analytics.schema.js";
+import {
+  formatInTimeZone,
+} from "date-fns-tz";
 
-type DateRange = {
-  from: Date;
-  to: Date;
+import type {
+  AnalyticsQuery,
+} from "../modules/analytics/analytics.schema.js";
 
-  previousFrom: Date;
-  previousTo: Date;
-};
+import {
+  resolveAnalyticsRangeQuery,
+} from "../modules/analytics/utils/analytics-range.util.js";
 
-const DAY =
-  24 * 60 * 60 * 1000;
+const DAY_MS =
+  24 *
+  60 *
+  60 *
+  1000;
 
-export const getAnalyticsDateRange = (
-  query: AnalyticsQuery
-): DateRange => {
-  const now = new Date();
+function shiftDateKey(
+  value:
+    string,
 
-  let from: Date;
-  let to: Date;
+  amount:
+    number
+) {
+  const date =
+    new Date(
+      `${value}T00:00:00.000Z`
+    );
 
-  switch (query.range) {
+  return new Date(
+    date.getTime() +
+      amount *
+        DAY_MS
+  )
+    .toISOString()
+    .slice(
+      0,
+      10
+    );
+}
+
+export function getAnalyticsDateRange(
+  query:
+    AnalyticsQuery
+) {
+  /*
+   * "Today" must mean today in the
+   * selected analytics timezone.
+   *
+   * NOT today in UTC.
+   */
+  const today =
+    formatInTimeZone(
+      new Date(),
+      query.timeZone,
+      "yyyy-MM-dd"
+    );
+
+  let from:
+    string;
+
+  let to:
+    string;
+
+  switch (
+    query.range
+  ) {
     case "today": {
-      from = new Date(now);
+      from =
+        today;
 
-      from.setUTCHours(
-        0,
-        0,
-        0,
-        0
-      );
-
-      to = now;
+      to =
+        today;
 
       break;
     }
 
     case "7d": {
-      to = now;
+      from =
+        shiftDateKey(
+          today,
+          -6
+        );
 
-      from = new Date(
-        now.getTime() -
-          7 * DAY
-      );
+      to =
+        today;
 
       break;
     }
 
     case "30d": {
-      to = now;
+      from =
+        shiftDateKey(
+          today,
+          -29
+        );
 
-      from = new Date(
-        now.getTime() -
-          30 * DAY
-      );
+      to =
+        today;
 
       break;
     }
 
     case "custom": {
-      if (!query.from || !query.to) {
+      if (
+        !query.from ||
+        !query.to
+      ) {
         throw new Error(
           "INVALID_DATE_RANGE"
         );
       }
 
-      from = new Date(
-        `${query.from}T00:00:00.000Z`
-      );
+      from =
+        query.from;
 
-      to = new Date(
-        `${query.to}T23:59:59.999Z`
-      );
+      to =
+        query.to;
 
       break;
     }
 
     default: {
-      throw new Error(
-        "INVALID_DATE_RANGE"
-      );
+      from =
+        shiftDateKey(
+          today,
+          -29
+        );
+
+      to =
+        today;
     }
   }
 
-  const duration =
-    to.getTime() -
-    from.getTime();
+  /*
+   * This utility converts calendar dates
+   * in the selected timezone into proper
+   * UTC boundaries.
+   */
+  const range =
+    resolveAnalyticsRangeQuery({
+      preset:
+        query.range ===
+          "today"
+          ? "custom"
+          : query.range,
 
-  const previousTo =
-    new Date(from.getTime());
+      from,
 
-  const previousFrom =
-    new Date(
-      from.getTime() -
-        duration
-    );
+      to,
+
+      timeZone:
+        query.timeZone,
+    });
 
   return {
-    from,
-    to,
-    previousFrom,
-    previousTo,
+    /*
+     * DB UTC boundaries.
+     *
+     * Always use:
+     *
+     * >= from
+     * < to
+     */
+    from:
+      range.fromUtc,
+
+    to:
+      range.toExclusiveUtc,
+
+    previousFrom:
+      range.previousFromUtc,
+
+    previousTo:
+      range.previousToExclusiveUtc,
   };
-};
+}

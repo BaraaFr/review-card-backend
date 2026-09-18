@@ -62,53 +62,86 @@ export function getLocationName(
         "Unnamed location"
     );
 }
-export const buildInteractionWhere = (
-    user: CurrentUser,
-    query: AnalyticsQuery,
-    from: Date,
-    to: Date
-) => {
+export const buildInteractionWhere =
+  (
+    user:
+      CurrentUser,
+
+    query:
+      AnalyticsQuery,
+
+    from:
+      Date,
+
+    to:
+      Date
+  ) => {
     return {
-        createdAt: {
-            gte: from,
-            lt: to,
-        },
+      /*
+       * ===================================================
+       * Canonical meaningful-interaction definition
+       * ===================================================
+       */
+      isBot:
+        false,
 
-        ...(query.cardId
-            ? {
-                cardId: query.cardId,
+      isDuplicate:
+        false,
+
+      createdAt: {
+        gte:
+          from,
+
+        lt:
+          to,
+      },
+
+      ...(
+        query.cardId
+          ? {
+              cardId:
+                query.cardId,
             }
-            : {}),
+          : {}
+      ),
 
-        ...(query.storeId
-            ? {
-                storeId: query.storeId,
+      ...(
+        query.storeId
+          ? {
+              storeId:
+                query.storeId,
             }
-            : {}),
+          : {}
+      ),
 
-        store: {
-            is: {
-                ...(query.businessId
-                    ? {
-                        businessId:
-                            query.businessId,
-                    }
-                    : {}),
+      store: {
+        is: {
+          ...(
+            query.businessId
+              ? {
+                  businessId:
+                    query.businessId,
+                }
+              : {}
+          ),
 
-                ...(user.role !==
-                    "SUPER_ADMIN"
-                    ? {
-                        business: {
-                            is: {
-                                ownerId: user.id,
-                            },
-                        },
-                    }
-                    : {}),
-            },
+          ...(
+            user.role !==
+            "SUPER_ADMIN"
+              ? {
+                  business: {
+                    is: {
+                      ownerId:
+                        user.id,
+                    },
+                  },
+                }
+              : {}
+          ),
         },
+      },
     };
-};
+  };
 
 const DAY_MS =
     24 *

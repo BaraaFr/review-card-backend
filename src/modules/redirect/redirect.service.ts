@@ -5,7 +5,9 @@ import {
 import {
   isSubscriptionUsable,
 } from "../../utils/subscription.js";
-
+import {
+  validateGoogleUrl,
+} from "../google/google-url.util.js";
 /*
  * =======================================================
  * Redirect context
@@ -73,6 +75,8 @@ export async function getCardRedirectContext(
                     status:
                       true,
 
+                    startsAt: true,
+
                     expiresAt:
                       true,
                   },
@@ -106,7 +110,7 @@ export async function getCardRedirectContext(
 
   if (
     card.status !==
-      "ACTIVE"
+    "ACTIVE"
   ) {
     throw new Error(
       "CARD_NOT_ACTIVE"
@@ -188,31 +192,10 @@ export async function getCardRedirectContext(
    * blindly trust database values.
    */
 
-  let reviewUrl:
-    URL;
-
-  try {
-    reviewUrl =
-      new URL(
-        card.store
-          .googleReviewUrl
-      );
-  } catch {
-    throw new Error(
-      "INVALID_GOOGLE_REVIEW_URL"
+  const reviewUrl =
+    validateGoogleUrl(
+      card.store.googleReviewUrl
     );
-  }
-
-  if (
-    reviewUrl.protocol !==
-      "https:" &&
-    reviewUrl.protocol !==
-      "http:"
-  ) {
-    throw new Error(
-      "INVALID_GOOGLE_REVIEW_URL"
-    );
-  }
 
   /*
    * Only a completely valid card gets

@@ -33,6 +33,15 @@ import {
   closePasswordResetRateLimit,
 } from "./modules/auth/password-reset-rate-limit.js";
 
+
+import {
+  trackingPrisma,
+} from "./lib/tracking-prisma.js";
+
+import {
+  drainTracking,
+} from "./modules/interactions/bounded-tracking.js";
+
 const server =
   app.listen(
     env.PORT,
@@ -139,8 +148,14 @@ async function shutdown() {
     
     closePasswordResetRateLimit();
 
-    await prisma
-      .$disconnect();
+    await drainTracking();
+
+    await Promise.all([
+      prisma.$disconnect(),
+    
+      trackingPrisma
+        .$disconnect(),
+    ]);
 
     clearTimeout(
       timeout

@@ -12,128 +12,134 @@ import { resolveAnalyticsRangeQuery, ResolvedAnalyticsRange } from "./utils/anal
 import { iterateMeaningfulInteractions } from "./utils/interaction-batches.js";
 import { ActionCenterItem, CurrentUser, DailyBucket, WeeklyReportHealth } from "./types/index.js";
 import { addUtcCalendarDays, buildInteractionWhere, formatDateOnlyUtc, formatHour, getCardActivityStatus, getCardName, getDateKey, getDateKeyInTimeZone, getDateLabel, getHour, getLocationName, getLocationStatus, getWeekday, normalizeTimeZone, parseDateOnlyUtc, shiftDateKey, WEEKDAYS } from "./utils/helpers.js";
+import {
+  dashboardOverview,
+  dashboardTimeline,
+} from "./dashboard-analytics.service.js";
 
 export const analyticsService = {
   async overview(
     user: CurrentUser,
     query: AnalyticsQuery
   ) {
-    const {
-      from,
-      to,
-      previousFrom,
-      previousTo,
-    } =
-      getAnalyticsDateRange(
-        query
-      );
+    // const {
+    //   from,
+    //   to,
+    //   previousFrom,
+    //   previousTo,
+    // } =
+    //   getAnalyticsDateRange(
+    //     query
+    //   );
 
-    const currentWhere =
-      buildInteractionWhere(
-        user,
-        query,
-        from,
-        to
-      );
+    // const currentWhere =
+    //   buildInteractionWhere(
+    //     user,
+    //     query,
+    //     from,
+    //     to
+    //   );
 
-    const previousWhere =
-      buildInteractionWhere(
-        user,
-        query,
-        previousFrom,
-        previousTo
-      );
+    // const previousWhere =
+    //   buildInteractionWhere(
+    //     user,
+    //     query,
+    //     previousFrom,
+    //     previousTo
+    //   );
 
-    const [
-      total,
-      previousTotal,
-      sourceGroups,
-      uniqueVisitors,
-    ] = await Promise.all([
-      prisma.interaction.count({
-        where: currentWhere,
-      }),
+    // const [
+    //   total,
+    //   previousTotal,
+    //   sourceGroups,
+    //   uniqueVisitors,
+    // ] = await Promise.all([
+    //   prisma.interaction.count({
+    //     where: currentWhere,
+    //   }),
 
-      prisma.interaction.count({
-        where: previousWhere,
-      }),
+    //   prisma.interaction.count({
+    //     where: previousWhere,
+    //   }),
 
-      prisma.interaction.groupBy({
-        by: ["source"],
+    //   prisma.interaction.groupBy({
+    //     by: ["source"],
 
-        where: currentWhere,
+    //     where: currentWhere,
 
-        _count: {
-          _all: true,
-        },
-      }),
+    //     _count: {
+    //       _all: true,
+    //     },
+    //   }),
 
-      prisma.interaction.groupBy({
-        by: ["visitorHash"],
+    //   prisma.interaction.groupBy({
+    //     by: ["visitorHash"],
 
-        where: {
-          ...currentWhere,
+    //     where: {
+    //       ...currentWhere,
 
-          visitorHash: {
-            not: null,
-          },
-        },
+    //       visitorHash: {
+    //         not: null,
+    //       },
+    //     },
 
-        _count: {
-          _all: true,
-        },
-      }),
-    ]);
+    //     _count: {
+    //       _all: true,
+    //     },
+    //   }),
+    // ]);
 
-    let nfc = 0;
-    let qr = 0;
-    let unknown = 0;
+    // let nfc = 0;
+    // let qr = 0;
+    // let unknown = 0;
 
-    for (
-      const group of sourceGroups
-    ) {
-      const count =
-        group._count._all;
+    // for (
+    //   const group of sourceGroups
+    // ) {
+    //   const count =
+    //     group._count._all;
 
-      if (
-        group.source === "NFC"
-      ) {
-        nfc = count;
-      } else if (
-        group.source === "QR"
-      ) {
-        qr = count;
-      } else {
-        unknown = count;
-      }
-    }
+    //   if (
+    //     group.source === "NFC"
+    //   ) {
+    //     nfc = count;
+    //   } else if (
+    //     group.source === "QR"
+    //   ) {
+    //     qr = count;
+    //   } else {
+    //     unknown = count;
+    //   }
+    // }
 
-    return {
-      period: {
-        from,
-        to,
-      },
+    // return {
+    //   period: {
+    //     from,
+    //     to,
+    //   },
 
-      totalInteractions: total,
+    //   totalInteractions: total,
 
-      previousInteractions:
-        previousTotal,
+    //   previousInteractions:
+    //     previousTotal,
 
-      percentageChange:
-        calculatePercentageChange(
-          total,
-          previousTotal
-        ),
+    //   percentageChange:
+    //     calculatePercentageChange(
+    //       total,
+    //       previousTotal
+    //     ),
 
-      approximateUniqueVisitors:
-        uniqueVisitors.length,
+    //   approximateUniqueVisitors:
+    //     uniqueVisitors.length,
 
-      source: {
-        nfc,
-        qr,
-        unknown,
-      },
-    };
+    //   source: {
+    //     nfc,
+    //     qr,
+    //     unknown,
+    //   },
+    // };
+
+    return dashboardOverview(user, query)
   },
 
   async cards(
@@ -405,95 +411,96 @@ export const analyticsService = {
     user: CurrentUser,
     query: AnalyticsQuery
   ) {
-    const {
-      from,
-      to,
-    } =
-      getAnalyticsDateRange(
-        query
-      );
+    return dashboardTimeline(user, query)
+    // const {
+    //   from,
+    //   to,
+    // } =
+    //   getAnalyticsDateRange(
+    //     query
+    //   );
 
-    const interactions =
-      await prisma.interaction.findMany({
-        where:
-          buildInteractionWhere(
-            user,
-            query,
-            from,
-            to
-          ),
+    // const interactions =
+    //   await prisma.interaction.findMany({
+    //     where:
+    //       buildInteractionWhere(
+    //         user,
+    //         query,
+    //         from,
+    //         to
+    //       ),
 
-        select: {
-          createdAt: true,
-          source: true,
-        },
+    //     select: {
+    //       createdAt: true,
+    //       source: true,
+    //     },
 
-        orderBy: {
-          createdAt: "asc",
-        },
-      });
+    //     orderBy: {
+    //       createdAt: "asc",
+    //     },
+    //   });
 
-    const map =
-      new Map<
-        string,
-        {
-          date: string;
-          total: number;
-          nfc: number;
-          qr: number;
-          unknown: number;
-        }
-      >();
+    // const map =
+    //   new Map<
+    //     string,
+    //     {
+    //       date: string;
+    //       total: number;
+    //       nfc: number;
+    //       qr: number;
+    //       unknown: number;
+    //     }
+    //   >();
 
-    for (
-      const interaction of
-      interactions
-    ) {
-      const date =
-        interaction.createdAt
-          .toISOString()
-          .slice(0, 10);
+    // for (
+    //   const interaction of
+    //   interactions
+    // ) {
+    //   const date =
+    //     interaction.createdAt
+    //       .toISOString()
+    //       .slice(0, 10);
 
-      if (!map.has(date)) {
-        map.set(date, {
-          date,
-          total: 0,
-          nfc: 0,
-          qr: 0,
-          unknown: 0,
-        });
-      }
+    //   if (!map.has(date)) {
+    //     map.set(date, {
+    //       date,
+    //       total: 0,
+    //       nfc: 0,
+    //       qr: 0,
+    //       unknown: 0,
+    //     });
+    //   }
 
-      const item =
-        map.get(date)!;
+    //   const item =
+    //     map.get(date)!;
 
-      item.total += 1;
+    //   item.total += 1;
 
-      if (
-        interaction.source ===
-        "NFC"
-      ) {
-        item.nfc += 1;
-      } else if (
-        interaction.source ===
-        "QR"
-      ) {
-        item.qr += 1;
-      } else {
-        item.unknown += 1;
-      }
-    }
+    //   if (
+    //     interaction.source ===
+    //     "NFC"
+    //   ) {
+    //     item.nfc += 1;
+    //   } else if (
+    //     interaction.source ===
+    //     "QR"
+    //   ) {
+    //     item.qr += 1;
+    //   } else {
+    //     item.unknown += 1;
+    //   }
+    // }
 
-    return {
-      period: {
-        from,
-        to,
-      },
+    // return {
+    //   period: {
+    //     from,
+    //     to,
+    //   },
 
-      timeline: Array.from(
-        map.values()
-      ),
-    };
+    //   timeline: Array.from(
+    //     map.values()
+    //   ),
+    // };
   },
 };
 
@@ -4766,7 +4773,7 @@ export async function getDataReport(
   const health:
     WeeklyReportHealth =
     warningItems.length >
-    0
+      0
       ? "NEEDS_ATTENTION"
       : "HEALTHY";
 
@@ -4781,36 +4788,36 @@ export async function getDataReport(
       .summary
       .bestCard
       ? {
-          id:
-            cardPerformance
-              .summary
-              .bestCard
-              .id,
+        id:
+          cardPerformance
+            .summary
+            .bestCard
+            .id,
 
-          name:
-            cardPerformance
-              .summary
-              .bestCard
-              .label,
+        name:
+          cardPerformance
+            .summary
+            .bestCard
+            .label,
 
-          code:
-            cardPerformance
-              .summary
-              .bestCard
-              .code,
+        code:
+          cardPerformance
+            .summary
+            .bestCard
+            .code,
 
-          interactions:
-            cardPerformance
-              .summary
-              .bestCard
-              .meaningfulInteractions,
+        interactions:
+          cardPerformance
+            .summary
+            .bestCard
+            .meaningfulInteractions,
 
-          uniqueVisitors:
-            cardPerformance
-              .summary
-              .bestCard
-              .uniqueVisitors,
-        }
+        uniqueVisitors:
+          cardPerformance
+            .summary
+            .bestCard
+            .uniqueVisitors,
+      }
       : null;
 
   /*
@@ -4824,40 +4831,40 @@ export async function getDataReport(
       .summary
       .totalLocations >
       1 &&
-    locationPerformance
-      .summary
-      .bestLocation
+      locationPerformance
+        .summary
+        .bestLocation
       ? {
-          id:
-            locationPerformance
-              .summary
-              .bestLocation
-              .id,
+        id:
+          locationPerformance
+            .summary
+            .bestLocation
+            .id,
 
-          name:
-            locationPerformance
-              .summary
-              .bestLocation
-              .name,
+        name:
+          locationPerformance
+            .summary
+            .bestLocation
+            .name,
 
-          interactions:
-            locationPerformance
-              .summary
-              .bestLocation
-              .interactions,
+        interactions:
+          locationPerformance
+            .summary
+            .bestLocation
+            .interactions,
 
-          uniqueVisitors:
-            locationPerformance
-              .summary
-              .bestLocation
-              .uniqueVisitors,
+        uniqueVisitors:
+          locationPerformance
+            .summary
+            .bestLocation
+            .uniqueVisitors,
 
-          changePercentage:
-            locationPerformance
-              .summary
-              .bestLocation
-              .changePercentage,
-        }
+        changePercentage:
+          locationPerformance
+            .summary
+            .bestLocation
+            .changePercentage,
+      }
       : null;
 
   /*

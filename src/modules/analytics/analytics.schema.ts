@@ -1,87 +1,190 @@
-import { z } from "zod";
+import {
+  z,
+} from "zod";
 
-const dateSchema = z
-  .string()
-  .regex(
-    /^\d{4}-\d{2}-\d{2}$/,
-    "Date must use YYYY-MM-DD format"
-  );
+const dateSchema =
+  z
+    .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}$/,
+      "Date must use YYYY-MM-DD format"
+    )
+    .refine(
+      (
+        value
+      ) => {
+        const date =
+          new Date(
+            `${value}T00:00:00.000Z`
+          );
 
-export const analyticsQuerySchema = z
-  .object({
-    range: z
-      .enum(["today", "7d", "30d", "custom"])
-      .default("30d"),
+        return (
+          Number.isFinite(
+            date.getTime()
+          ) &&
+          date
+            .toISOString()
+            .slice(
+              0,
+              10
+            ) === value
+        );
+      },
 
-    from: dateSchema.optional(),
-
-    to: dateSchema.optional(),
-
-    businessId: z.string().optional(),
-
-    storeId: z.string().optional(),
-
-    cardId: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.range !== "custom") {
-      return;
-    }
-
-    if (!data.from) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["from"],
-        message:
-          "from is required for custom range",
-      });
-    }
-
-    if (!data.to) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["to"],
-        message:
-          "to is required for custom range",
-      });
-    }
-
-    if (!data.from || !data.to) {
-      return;
-    }
-
-    const from = new Date(
-      `${data.from}T00:00:00.000Z`
+      "Invalid calendar date"
     );
 
-    const to = new Date(
-      `${data.to}T23:59:59.999Z`
+function validTimeZone(
+  value:
+    string
+) {
+  try {
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone:
+          value,
+      }
+    ).format();
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const analyticsQuerySchema =
+  z
+    .object({
+      range:
+        z
+          .enum([
+            "today",
+            "7d",
+            "30d",
+            "custom",
+          ])
+          .optional(),
+
+      from:
+        dateSchema
+          .optional(),
+
+      to:
+        dateSchema
+          .optional(),
+
+      timeZone:
+        z
+          .string()
+          .max(100)
+          .default(
+            "UTC"
+          )
+          .refine(
+            validTimeZone,
+            "Invalid timezone"
+          ),
+
+      businessId:
+        z
+          .string()
+          .min(1)
+          .optional(),
+
+      storeId:
+        z
+          .string()
+          .min(1)
+          .optional(),
+
+      cardId:
+        z
+          .string()
+          .min(1)
+          .optional(),
+    })
+
+    .transform(
+      (
+        value
+      ) => ({
+        ...value,
+
+        range:
+          value.range ??
+          (
+            value.from ||
+            value.to
+              ? "custom" as const
+              : "30d" as const
+          ),
+      })
+    )
+
+    .superRefine(
+      (
+        value,
+        context
+      ) => {
+        if (
+          value.range !==
+          "custom"
+        ) {
+          return;
+        }
+
+        if (
+          !value.from ||
+          !value.to
+        ) {
+          context.addIssue({
+            code:
+              "custom",
+
+            message:
+              "Both from and to are required",
+
+            path: [
+              "from",
+            ],
+          });
+
+          return;
+        }
+
+        const days =
+          (
+            Date.parse(
+              value.to
+            ) -
+            Date.parse(
+              value.from
+            )
+          ) /
+            86_400_000 +
+          1;
+
+        if (
+          days < 1 ||
+          days > 366
+        ) {
+          context.addIssue({
+            code:
+              "custom",
+
+            message:
+              "Choose between 1 and 366 days",
+
+            path: [
+              "to",
+            ],
+          });
+        }
+      }
     );
 
-    if (to < from) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["to"],
-        message:
-          "to must be after from",
-      });
-
-      return;
-    }
-
-    const days =
-      (to.getTime() - from.getTime()) /
-      (1000 * 60 * 60 * 24);
-
-    if (days > 366) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          "Custom analytics range cannot exceed 366 days",
-      });
-    }
-  });
-
-export type AnalyticsQuery = z.infer<
-  typeof analyticsQuerySchema
->;
+export type AnalyticsQuery =
+  z.infer<
+    typeof analyticsQuerySchema
+  >;
