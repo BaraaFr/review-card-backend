@@ -123,3 +123,12 @@ export const WeeklyReportDeliveryKind = {
 } as const
 
 export type WeeklyReportDeliveryKind = (typeof WeeklyReportDeliveryKind)[keyof typeof WeeklyReportDeliveryKind]
+
+
+export const EmailDispatchStatus = {
+  PROCESSING: 'PROCESSING',
+  SENT: 'SENT',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type EmailDispatchStatus = (typeof EmailDispatchStatus)[keyof typeof EmailDispatchStatus]

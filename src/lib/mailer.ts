@@ -89,7 +89,7 @@ function getTransporter():
   return transporter;
 }
 
-type SendEmailInput = {
+export type SendEmailInput = {
   to:
     string;
 

@@ -87,3 +87,8 @@ export type PaymentRecord = Prisma.PaymentRecordModel
  * 
  */
 export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model EmailDispatch
+ * 
+ */
+export type EmailDispatch = Prisma.EmailDispatchModel

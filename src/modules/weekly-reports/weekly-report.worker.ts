@@ -11,10 +11,6 @@ import {
   } from "../../lib/redis.js";
   
   import {
-    sendEmail,
-  } from "../../lib/mailer.js";
-  
-  import {
     getBusinessWeeklyReport,
   } from "./business-weekly-report.service.js";
   
@@ -26,6 +22,7 @@ import {
     WEEKLY_REPORT_QUEUE,
     type WeeklyReportJobData,
   } from "./weekly-report.queue.js";
+import { sendEmailOnce } from "../../lib/send-email-once.js";
   
   let worker:
     Worker<WeeklyReportJobData> |
@@ -121,22 +118,26 @@ import {
                 report
               );
   
-            await sendEmail({
-              to:
-                delivery.recipient,
-  
-              subject:
-                email.subject,
-  
-              html:
-                email.html,
-  
-              text:
-                email.text,
-  
-              messageId:
-                `<weekly-${delivery.id}@valyou>`,
-            });
+              await sendEmailOnce(
+                `weekly-report:${delivery.id}`,
+              
+                {
+                  to:
+                    delivery.recipient,
+              
+                  subject:
+                    email.subject,
+              
+                  html:
+                    email.html,
+              
+                  text:
+                    email.text,
+              
+                  messageId:
+                    `<weekly-${delivery.id}@valyou>`,
+                }
+              );
   
             const sentAt =
               new Date();

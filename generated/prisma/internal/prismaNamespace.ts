@@ -403,7 +403,8 @@ export const ModelName = {
   AccountRequest: 'AccountRequest',
   IdempotencyRecord: 'IdempotencyRecord',
   PaymentRecord: 'PaymentRecord',
-  AuditEvent: 'AuditEvent'
+  AuditEvent: 'AuditEvent',
+  EmailDispatch: 'EmailDispatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "accountInvitation" | "weeklyReportDelivery" | "business" | "store" | "card" | "interaction" | "subscription" | "authSession" | "accountRequest" | "idempotencyRecord" | "paymentRecord" | "auditEvent"
+    modelProps: "user" | "passwordResetToken" | "accountInvitation" | "weeklyReportDelivery" | "business" | "store" | "card" | "interaction" | "subscription" | "authSession" | "accountRequest" | "idempotencyRecord" | "paymentRecord" | "auditEvent" | "emailDispatch"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1459,6 +1460,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmailDispatch: {
+      payload: Prisma.$EmailDispatchPayload<ExtArgs>
+      fields: Prisma.EmailDispatchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailDispatchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailDispatchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailDispatchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailDispatchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        findMany: {
+          args: Prisma.EmailDispatchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>[]
+        }
+        create: {
+          args: Prisma.EmailDispatchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        createMany: {
+          args: Prisma.EmailDispatchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailDispatchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailDispatchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        update: {
+          args: Prisma.EmailDispatchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailDispatchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailDispatchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailDispatchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailDispatchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailDispatchPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailDispatchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailDispatch>
+        }
+        groupBy: {
+          args: Prisma.EmailDispatchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailDispatchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailDispatchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailDispatchCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1724,6 +1799,24 @@ export const AuditEventScalarFieldEnum = {
 } as const
 
 export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const EmailDispatchScalarFieldEnum = {
+  id: 'id',
+  dispatchKey: 'dispatchKey',
+  recipient: 'recipient',
+  subject: 'subject',
+  messageId: 'messageId',
+  status: 'status',
+  startedAt: 'startedAt',
+  sentAt: 'sentAt',
+  uncertainAt: 'uncertainAt',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailDispatchScalarFieldEnum = (typeof EmailDispatchScalarFieldEnum)[keyof typeof EmailDispatchScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2012,6 +2105,20 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'EmailDispatchStatus'
+ */
+export type EnumEmailDispatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailDispatchStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EmailDispatchStatus[]'
+ */
+export type ListEnumEmailDispatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailDispatchStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2125,6 +2232,7 @@ export type GlobalOmitConfig = {
   idempotencyRecord?: Prisma.IdempotencyRecordOmit
   paymentRecord?: Prisma.PaymentRecordOmit
   auditEvent?: Prisma.AuditEventOmit
+  emailDispatch?: Prisma.EmailDispatchOmit
 }
 
 /* Types for Logging */

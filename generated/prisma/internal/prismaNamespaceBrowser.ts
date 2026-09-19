@@ -62,7 +62,8 @@ export const ModelName = {
   AccountRequest: 'AccountRequest',
   IdempotencyRecord: 'IdempotencyRecord',
   PaymentRecord: 'PaymentRecord',
-  AuditEvent: 'AuditEvent'
+  AuditEvent: 'AuditEvent',
+  EmailDispatch: 'EmailDispatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -307,6 +308,24 @@ export const AuditEventScalarFieldEnum = {
 } as const
 
 export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const EmailDispatchScalarFieldEnum = {
+  id: 'id',
+  dispatchKey: 'dispatchKey',
+  recipient: 'recipient',
+  subject: 'subject',
+  messageId: 'messageId',
+  status: 'status',
+  startedAt: 'startedAt',
+  sentAt: 'sentAt',
+  uncertainAt: 'uncertainAt',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailDispatchScalarFieldEnum = (typeof EmailDispatchScalarFieldEnum)[keyof typeof EmailDispatchScalarFieldEnum]
 
 
 export const SortOrder = {

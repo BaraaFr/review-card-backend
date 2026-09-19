@@ -432,3 +432,35 @@ model AuditEvent {
   @@index([actorId, createdAt])
   @@index([target, createdAt])
 }
+
+enum EmailDispatchStatus {
+  PROCESSING
+  SENT
+  UNKNOWN
+}
+
+model EmailDispatch {
+  id String @id @default(cuid())
+
+  dispatchKey String @unique
+
+  recipient String
+  subject   String
+
+  messageId String?
+
+  status EmailDispatchStatus @default(PROCESSING)
+
+  startedAt DateTime @default(now())
+
+  sentAt DateTime?
+
+  uncertainAt DateTime?
+
+  error String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, updatedAt])
+}
