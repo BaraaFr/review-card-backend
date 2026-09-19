@@ -6,6 +6,8 @@ import type {
 declare global {
   namespace Express {
     interface Request {
+      requestId:
+      string;
       user?: {
         id: string;
 
@@ -21,4 +23,4 @@ declare global {
   }
 }
 
-export {};
+export { };

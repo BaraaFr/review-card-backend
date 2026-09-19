@@ -13,6 +13,7 @@ import {
 import {
   AnalyticsRangeError,
 } from "../modules/analytics/utils/analytics-range.util.js";
+import { logError, logWarn } from "../lib/logger.js";
 
 export const errorHandler:
   ErrorRequestHandler =
@@ -20,7 +21,7 @@ export const errorHandler:
     error:
       unknown,
 
-    _req,
+    req,
 
     res,
 
@@ -38,6 +39,34 @@ export const errorHandler:
       error instanceof
       DomainError
     ) {
+      if (
+        error.status >=
+        500
+      ) {
+        logWarn(
+          "request_domain_error",
+
+          {
+            requestId:
+              req.requestId,
+
+            method:
+              req.method,
+
+            path:
+              req.originalUrl
+                ?.split(
+                  "?"
+                )[0],
+
+            statusCode:
+              error.status,
+
+            code:
+              error.code,
+          }
+        );
+      }
       if (
         error.status ===
         503
@@ -111,24 +140,24 @@ export const errorHandler:
     const requestError =
       error as {
         status?:
-          unknown;
+        unknown;
 
         expose?:
-          unknown;
+        unknown;
       } |
       null;
 
     if (
       requestError
         ?.expose ===
-        true &&
+      true &&
       typeof requestError
         .status ===
-        "number" &&
+      "number" &&
       requestError.status >=
-        400 &&
+      400 &&
       requestError.status <
-        500
+      500
     ) {
       return res
         .status(
@@ -146,21 +175,41 @@ export const errorHandler:
         });
     }
 
-    console.error(
-      "Unhandled request error",
-      error
+    logError(
+      "request_unhandled_error",
+
+      error,
+
+      {
+        requestId:
+          req.requestId,
+
+        method:
+          req.method,
+
+        path:
+          req.originalUrl
+            ?.split(
+              "?"
+            )[0],
+
+        statusCode:
+          500,
+      }
     );
-
     return res
-      .status(500)
-      .json({
-        success:
-          false,
-
-        code:
-          "INTERNAL_SERVER_ERROR",
-
-        message:
-          "An unexpected error occurred.",
-      });
+    .status(500)
+    .json({
+      success:
+        false,
+  
+      code:
+        "INTERNAL_SERVER_ERROR",
+  
+      message:
+        "An unexpected error occurred.",
+  
+      requestId:
+        req.requestId,
+    });
   };

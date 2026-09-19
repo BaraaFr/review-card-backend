@@ -43,6 +43,7 @@ import {
 import {
   isReady,
 } from "./lib/readiness.js";
+import { requestObservability } from "./middleware/request-observability.js";
 
 const app =
   express();
@@ -77,6 +78,19 @@ if (
  */
 app.disable(
   "x-powered-by"
+);
+/*
+ * Every request gets a correlation ID,
+ * including requests rejected by:
+ *
+ * - CORS
+ * - trusted-origin
+ * - body parser
+ * - authentication
+ * - rate limiting
+ */
+app.use(
+  requestObservability
 );
 
 app.use(

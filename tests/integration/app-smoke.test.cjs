@@ -12,7 +12,7 @@ test(
     t.mock.method(
       console,
       "error",
-      () => {}
+      () => { }
     );
 
     const routes =
@@ -89,37 +89,37 @@ test(
             express.Router(),
 
           "./modules/queues/queue-dashboard.js":
+          {
+            queueDashboardAdapter:
             {
-              queueDashboardAdapter:
-                {
-                  getRouter:
-                    () =>
-                      express.Router(),
-                },
+              getRouter:
+                () =>
+                  express.Router(),
             },
+          },
 
           "./middleware/auth.middleware.js":
-            {
-              authenticate:
+          {
+            authenticate:
+              (
+                _req,
+                _res,
+                next
+              ) =>
+                next(),
+          },
+
+          "./middleware/role.middleware.js":
+          {
+            authorize:
+              () =>
                 (
                   _req,
                   _res,
                   next
                 ) =>
                   next(),
-            },
-
-          "./middleware/role.middleware.js":
-            {
-              authorize:
-                () =>
-                  (
-                    _req,
-                    _res,
-                    next
-                  ) =>
-                    next(),
-            },
+          },
         }
       ).default;
 
@@ -159,8 +159,8 @@ test(
               ) =>
                 error
                   ? reject(
-                      error
-                    )
+                    error
+                  )
                   : resolve()
             )
         )
@@ -171,8 +171,8 @@ test(
 
     assert.ok(
       address &&
-        typeof address !==
-          "string"
+      typeof address !==
+      "string"
     );
 
     const base =
@@ -188,6 +188,12 @@ test(
       await fetch(
         `${base}/api/health`
       );
+
+    assert.ok(
+      health.headers.get(
+        "x-request-id"
+      )
+    );
 
     assert.equal(
       health.status,
@@ -407,6 +413,14 @@ test(
         `${base}/api/failure`
       );
 
+    const failedRequestId =
+      failed.headers.get(
+        "x-request-id"
+      );
+
+    assert.ok(
+      failedRequestId
+    );
     assert.equal(
       failed.status,
       500
@@ -414,6 +428,11 @@ test(
 
     const failedBody =
       await failed.json();
+
+    assert.equal(
+      failedBody.requestId,
+      failedRequestId
+    );
 
     assert.equal(
       failedBody.code,

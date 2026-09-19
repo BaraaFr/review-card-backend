@@ -41,6 +41,11 @@ import {
 import {
   drainTracking,
 } from "./modules/interactions/bounded-tracking.js";
+import { installFatalProcessHandlers } from "./lib/process-observability.js";
+
+installFatalProcessHandlers(
+  "api"
+);
 
 const server =
   app.listen(

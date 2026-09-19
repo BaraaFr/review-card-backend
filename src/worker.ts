@@ -17,6 +17,7 @@ import {
   startBackgroundJobs,
   stopBackgroundJobs,
 } from "./modules/queues/background-jobs.js";
+import { installFatalProcessHandlers } from "./lib/process-observability.js";
 
 /*
  * Fail worker startup immediately
@@ -24,6 +25,9 @@ import {
  * available/configured.
  */
 try {
+  installFatalProcessHandlers(
+    "worker"
+  );
   /*
    * Database must be reachable.
    */
