@@ -383,6 +383,7 @@ enum WeeklyReportDeliveryStatus {
   PROCESSING
   SENT
   FAILED
+  SKIPPED
 }
 
 enum WeeklyReportDeliveryKind {

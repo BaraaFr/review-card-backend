@@ -111,7 +111,8 @@ export const WeeklyReportDeliveryStatus = {
   PENDING: 'PENDING',
   PROCESSING: 'PROCESSING',
   SENT: 'SENT',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED'
 } as const
 
 export type WeeklyReportDeliveryStatus = (typeof WeeklyReportDeliveryStatus)[keyof typeof WeeklyReportDeliveryStatus]

@@ -76,10 +76,12 @@ import { sendEmailOnce } from "../../lib/send-email-once.js";
               "WEEKLY_REPORT_DELIVERY_NOT_FOUND"
             );
           }
-  
+          
           if (
             delivery.status ===
-            "SENT"
+              "SENT" ||
+            delivery.status ===
+              "SKIPPED"
           ) {
             return;
           }
