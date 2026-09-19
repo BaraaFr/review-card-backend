@@ -1,4 +1,5 @@
 import {
+  UnrecoverableError,
     Worker,
   } from "bullmq";
   
@@ -120,26 +121,43 @@ import { sendEmailOnce } from "../../lib/send-email-once.js";
                 report
               );
   
-              await sendEmailOnce(
-                `weekly-report:${delivery.id}`,
+              try {
+                await sendEmailOnce(
+                  `weekly-report:${delivery.id}`,
               
-                {
-                  to:
-                    delivery.recipient,
+                  {
+                    to:
+                      delivery.recipient,
               
-                  subject:
-                    email.subject,
+                    subject:
+                      email.subject,
               
-                  html:
-                    email.html,
+                    html:
+                      email.html,
               
-                  text:
-                    email.text,
+                    text:
+                      email.text,
               
-                  messageId:
-                    `<weekly-${delivery.id}@valyou>`,
+                    messageId:
+                      `<weekly-${delivery.id}@valyou>`,
+                  }
+                );
+              } catch (
+                error
+              ) {
+                if (
+                  error instanceof
+                    Error &&
+                  error.message ===
+                    "EMAIL_DELIVERY_UNCERTAIN"
+                ) {
+                  throw new UnrecoverableError(
+                    "EMAIL_DELIVERY_UNCERTAIN"
+                  );
                 }
-              );
+              
+                throw error;
+              }
   
             const sentAt =
               new Date();

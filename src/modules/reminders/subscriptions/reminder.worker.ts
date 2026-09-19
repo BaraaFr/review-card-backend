@@ -1,4 +1,5 @@
 import {
+  UnrecoverableError,
   Worker,
 } from "bullmq";
 import { SUBSCRIPTION_REMINDER_QUEUE, SubscriptionReminderJobData } from "./reminder.queue.js";
@@ -174,26 +175,47 @@ export function startSubscriptionReminderWorker() {
          *
          * BullMQ will retry failures.
          */
-        await sendEmailOnce(
-          `subscription-expiry:${subscription.id}:${subscription.expiresAt.getTime()}`,
-
-          {
-            to:
-              subscription.business.owner.email,
-
-            subject:
-              email.subject,
-
-            html:
-              email.html,
-
-            text:
-              email.text,
-
-            messageId:
-              `<subscription-expiry-${subscription.id}-${subscription.expiresAt.getTime()}@valyou>`,
+        try {
+          await sendEmailOnce(
+            `subscription-expiry:${subscription.id}:${subscription.expiresAt.getTime()}`,
+        
+            {
+              to:
+                subscription.business.owner.email,
+        
+              subject:
+                email.subject,
+        
+              html:
+                email.html,
+        
+              text:
+                email.text,
+        
+              messageId:
+                `<subscription-expiry-${subscription.id}-${subscription.expiresAt.getTime()}@valyou>`,
+            }
+          );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              Error &&
+            error.message ===
+              "EMAIL_DELIVERY_UNCERTAIN"
+          ) {
+            /*
+             * Retrying this automatically is
+             * intentionally unsafe.
+             */
+            throw new UnrecoverableError(
+              "EMAIL_DELIVERY_UNCERTAIN"
+            );
           }
-        );
+        
+          throw error;
+        }
         await prisma.subscription.update({
           where: {
             id:
