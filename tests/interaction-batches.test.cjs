@@ -45,7 +45,15 @@ test('analytics crosses a page boundary without losing timestamp ties or double-
     }
   );
   const from = new Date('2026-09-12T21:00:00Z'), to = new Date('2026-09-13T21:00:00Z');
-  const report = await api.getStoreEngagementPatterns('s', {
+  
+  const user = {
+    id:
+      "admin",
+
+    role:
+      "SUPER_ADMIN",
+  };
+  const report = await api.getStoreEngagementPatterns(user, 's', {
     preset: 'custom', from: '2026-09-13', to: '2026-09-13', days: 1,
     timeZone: 'Asia/Beirut', fromUtc: from, toExclusiveUtc: to,
     previousFrom: '2026-09-12', previousTo: '2026-09-12',

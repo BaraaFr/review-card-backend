@@ -243,10 +243,11 @@ export async function getActionCenterController(
       );
 
     const data =
-      await getActionCenter(
-        storeId as string,
-        range
-      );
+    await getActionCenter(
+      req.user!,
+      storeId as string,
+      range
+    );
 
     return res.json({
       success:
@@ -322,10 +323,11 @@ export async function getStoreCardPerformanceController(
       );
 
     const data =
-      await getStoreCardPerformance(
-        storeId as string,
-        range
-      );
+    await getStoreCardPerformance(
+      req.user!,
+      storeId as string,
+      range
+    );
 
     return res.json({
       success:
@@ -400,6 +402,7 @@ export async function getStoreEngagementSummaryController(
 
     const data =
       await getStoreEngagementSummary(
+        req.user!,
         storeId as string,
         range
       );
@@ -461,6 +464,7 @@ export async function getStoreEngagementPatternsController(
 
     const data =
       await getStoreEngagementPatterns(
+        req.user!,
         storeId as string,
         range
       );
@@ -520,6 +524,7 @@ export async function downloadAnalyticsReportController(
     const range = resolveAnalyticsRangeQuery(req.query)
 
     const report = await getFilteredAnalyticsReport(
+      req.user!,
       storeId as string,
       range,
     );
@@ -607,6 +612,7 @@ export async function getLocationPerformanceController(
 
     const data =
       await getLocationPerformance(
+        req.user!,
         storeId as string,
         range
       );
@@ -675,6 +681,7 @@ export async function getDataReportController(
 
     const data =
       await getDataReport(
+        req.user!,
         storeId as string,
         range
       );
@@ -688,9 +695,9 @@ export async function getDataReportController(
   } catch (error) {
     if (
       error instanceof
-        Error &&
+      Error &&
       error.message ===
-        "STORE_NOT_FOUND"
+      "STORE_NOT_FOUND"
     ) {
       return res
         .status(404)
@@ -756,6 +763,7 @@ export async function getWeeklyReportController(
         : "UTC";
 
     const data = await getWeeklyReport(
+      req.user!,
       storeId as string,
       timeZone
     );
@@ -795,7 +803,7 @@ export async function getWeeklyReportController(
         .json({
           success:
             false,
-    
+
           message:
             error.message,
         });

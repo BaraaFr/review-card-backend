@@ -21,6 +21,33 @@ import {
   resolveWeeklyReportRange,
 } from "../../utils/weekly-report-range.js";
 
+function accessibleAnalyticsStoreWhere(
+  user:
+    CurrentUser,
+
+  storeId:
+    string
+) {
+  return {
+    id:
+      storeId,
+
+    ...(
+      user.role ===
+        "SUPER_ADMIN"
+        ? {}
+        : {
+          business: {
+            is: {
+              ownerId:
+                user.id,
+            },
+          },
+        }
+    ),
+  };
+}
+
 export const analyticsService = {
   overview: dashboardOverview,
 
@@ -348,6 +375,7 @@ export const analyticsService = {
 };
 
 export async function getActionCenter(
+  user:CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange
 ) {
@@ -359,10 +387,10 @@ export async function getActionCenter(
 
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where:    accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
       select: {
         id:
@@ -411,11 +439,13 @@ export async function getActionCenter(
   ] =
     await Promise.all([
       getStoreCardPerformance(
+        user,
         storeId,
         range
       ),
-
+      
       getLocationPerformance(
+        user,
         storeId,
         range
       ),
@@ -942,26 +972,16 @@ export function buildActionCenter({ store, range, cardPerformance, locationPerfo
 }
 
 export async function getStoreCardPerformance(
+  user:CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange
 ) {
-  /*
-   * =====================================================
-   * Verify store
-   * =====================================================
-   *
-   * Authorization and subscription
-   * validation are already handled by:
-   *
-   * requireFeatureAccess("ANALYTICS")
-   */
-
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where:  accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
       select: {
         id:
@@ -1731,6 +1751,7 @@ export async function getStoreCardPerformance(
 }
 
 export async function getStoreEngagementSummary(
+  user: CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange
 ) {
@@ -1752,10 +1773,11 @@ export async function getStoreEngagementSummary(
 
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where:
+        accessibleAnalyticsStoreWhere(
+          user,
+          storeId
+        ),
 
       select: {
         id:
@@ -2352,6 +2374,7 @@ export async function getStoreEngagementSummary(
 
 
 export async function getStoreEngagementPatterns(
+  user:CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange
 ) {
@@ -2363,10 +2386,10 @@ export async function getStoreEngagementPatterns(
 
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where: accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
       select: {
         id:
@@ -2974,6 +2997,7 @@ export async function getStoreEngagementPatterns(
 }
 
 export async function getLocationPerformance(
+  user:CurrentUser,
   contextStoreId: string,
   range: ResolvedAnalyticsRange
 ) {
@@ -2990,10 +3014,10 @@ export async function getLocationPerformance(
 
   const contextStore =
     await prisma.store.findUnique({
-      where: {
-        id:
-          contextStoreId,
-      },
+      where:  accessibleAnalyticsStoreWhere(
+        user,
+        contextStoreId
+      ),
 
       select: {
         id:
@@ -3754,6 +3778,7 @@ export async function getLocationPerformance(
 }
 
 export async function getWeeklyReport(
+  user:CurrentUser,
   storeId:
     string,
 
@@ -3771,10 +3796,10 @@ export async function getWeeklyReport(
 
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where:   accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
       select: {
         id:
@@ -3818,21 +3843,25 @@ export async function getWeeklyReport(
   ] =
     await Promise.all([
       getStoreEngagementSummary(
+        user,
         storeId,
         range
       ),
-
+      
       getStoreEngagementPatterns(
+        user,
         storeId,
         range
       ),
-
+      
       getStoreCardPerformance(
+        user,
         storeId,
         range
       ),
-
+      
       getLocationPerformance(
+        user,
         storeId,
         range
       ),
@@ -4409,6 +4438,7 @@ export async function getWeeklyReport(
 }
 
 export async function getDataReport(
+  user:CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange
 ) {
@@ -4420,9 +4450,10 @@ export async function getDataReport(
 
   const store =
     await prisma.store.findUnique({
-      where: {
-        id: storeId,
-      },
+      where:  accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
 
       select: {
@@ -4463,21 +4494,25 @@ export async function getDataReport(
   ] =
     await Promise.all([
       getStoreEngagementSummary(
+        user,
         storeId,
         range
       ),
-
+  
       getStoreEngagementPatterns(
+        user,
         storeId,
         range
       ),
-
+  
       getStoreCardPerformance(
+        user,
         storeId,
         range
       ),
-
+  
       getLocationPerformance(
+        user,
         storeId,
         range
       ),
@@ -4986,15 +5021,16 @@ export async function getDataReport(
 }
 
 export async function getFilteredAnalyticsReport(
+  user:CurrentUser,
   storeId: string,
   range: ResolvedAnalyticsRange,
 ) {
   const store =
     await prisma.store.findUnique({
-      where: {
-        id:
-          storeId,
-      },
+      where: accessibleAnalyticsStoreWhere(
+        user,
+        storeId
+      ),
 
       select: {
         id:
@@ -5032,21 +5068,25 @@ export async function getFilteredAnalyticsReport(
   ] =
     await Promise.all([
       getStoreEngagementSummary(
+        user,
         storeId,
         range
       ),
-
+  
       getStoreEngagementPatterns(
-        storeId,
-        range,
-      ),
-
-      getStoreCardPerformance(
+        user,
         storeId,
         range
       ),
-
+  
+      getStoreCardPerformance(
+        user,
+        storeId,
+        range
+      ),
+  
       getLocationPerformance(
+        user,
         storeId,
         range
       ),
