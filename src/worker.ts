@@ -23,16 +23,68 @@ import {
  * if required infrastructure is not
  * available/configured.
  */
-await prisma
-  .$connect();
+try {
+  /*
+   * Database must be reachable.
+   */
+  await prisma
+    .$connect();
 
-await verifyMailer();
+  /*
+   * SMTP configuration and credentials
+   * must be usable.
+   */
+  await verifyMailer();
 
-startBackgroundJobs();
+  /*
+   * BullMQ Redis connections must be
+   * ready before startup succeeds.
+   */
+  await startBackgroundJobs();
 
-console.log(
-  "ValYou worker started"
-);
+  console.log(
+    "ValYou worker started"
+  );
+} catch (
+  error
+) {
+  console.error(
+    "worker_startup_failed",
+    error
+  );
+
+  /*
+   * Clean up anything that may have
+   * opened before startup failed.
+   */
+  try {
+    await stopBackgroundJobs();
+  } catch (
+    cleanupError
+  ) {
+    console.error(
+      "worker_startup_cleanup_failed",
+      cleanupError
+    );
+  }
+
+  closeMailer();
+
+  closeRedisConnections();
+
+  try {
+    await prisma
+      .$disconnect();
+  } catch {
+    /*
+     * Startup is already failing.
+     */
+  }
+
+  process.exit(
+    1
+  );
+}
 
 let closing =
   false;

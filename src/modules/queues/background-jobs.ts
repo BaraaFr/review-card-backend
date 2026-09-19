@@ -29,46 +29,190 @@ import {
 let started =
   false;
 
-export function startBackgroundJobs() {
+let starting:
+  Promise<void> |
+  null =
+  null;
+
+/*
+ * =========================================================
+ * Start
+ * =========================================================
+ *
+ * Important:
+ *
+ * Workers are created first.
+ *
+ * Then we prove:
+ *
+ * - worker Redis connections are ready
+ * - producer queue Redis connections are ready
+ *
+ * Only AFTER that do we start schedulers.
+ *
+ * This prevents:
+ *
+ * scheduler creates durable DB work
+ * while the worker infrastructure
+ * is not actually operational.
+ */
+export async function startBackgroundJobs() {
   if (
     started
   ) {
     return;
   }
 
-  started =
-    true;
+  /*
+   * Prevent two concurrent startup calls
+   * from creating duplicate workers.
+   */
+  if (
+    starting
+  ) {
+    return starting;
+  }
 
-  startWeeklyReportWorker();
+  starting =
+    (
+      async () => {
+        const weeklyWorker =
+          startWeeklyReportWorker();
 
-  startSubscriptionReminderWorker();
+        const subscriptionWorker =
+          startSubscriptionReminderWorker();
 
-  startWeeklyReportScheduler();
+        try {
+          /*
+           * =================================================
+           * Infrastructure readiness
+           * =================================================
+           */
 
-  startSubscriptionReminderScheduler();
+          await Promise.all([
+            weeklyWorker
+              .waitUntilReady(),
 
-  console.log(
-    "ValYou background jobs started"
-  );
+            subscriptionWorker
+              .waitUntilReady(),
+
+            weeklyReportQueue
+              .waitUntilReady(),
+
+            subscriptionReminderQueue
+              .waitUntilReady(),
+          ]);
+
+          /*
+           * Only allow schedulers to create work
+           * after queue infrastructure is ready.
+           */
+          startWeeklyReportScheduler();
+
+          startSubscriptionReminderScheduler();
+
+          started =
+            true;
+
+          console.log(
+            "ValYou background jobs ready"
+          );
+        } catch (
+          error
+        ) {
+          /*
+           * Startup did not complete.
+           *
+           * Close everything that may have
+           * partially started.
+           */
+
+          await Promise.allSettled([
+            stopWeeklyReportScheduler(),
+
+            stopSubscriptionReminderScheduler(),
+
+            stopWeeklyReportWorker(),
+
+            stopSubscriptionReminderWorker(),
+
+            weeklyReportQueue
+              .close(),
+
+            subscriptionReminderQueue
+              .close(),
+          ]);
+
+          started =
+            false;
+
+          throw error;
+        }
+      }
+    )();
+
+  try {
+    await starting;
+  } finally {
+    starting =
+      null;
+  }
 }
 
+/*
+ * =========================================================
+ * Stop
+ * =========================================================
+ */
+
 export async function stopBackgroundJobs() {
+  /*
+   * If shutdown arrives while startup is
+   * still resolving, wait for it to settle.
+   */
+  if (
+    starting
+  ) {
+    try {
+      await starting;
+    } catch {
+      /*
+       * Startup cleanup already ran.
+       */
+    }
+  }
+
+  /*
+   * Stop schedulers first.
+   *
+   * No new jobs should be created while
+   * workers are shutting down.
+   */
   await Promise.all([
     stopWeeklyReportScheduler(),
 
     stopSubscriptionReminderScheduler(),
   ]);
 
+  /*
+   * Worker.close() allows currently
+   * active processing to finish.
+   */
   await Promise.all([
     stopWeeklyReportWorker(),
 
     stopSubscriptionReminderWorker(),
   ]);
 
+  /*
+   * Producer connections last.
+   */
   await Promise.all([
-    weeklyReportQueue.close(),
+    weeklyReportQueue
+      .close(),
 
-    subscriptionReminderQueue.close(),
+    subscriptionReminderQueue
+      .close(),
   ]);
 
   started =

@@ -241,6 +241,38 @@ export function startSubscriptionReminderWorker() {
       }
     );
 
+
+    worker.on(
+      "error",
+    
+      (
+        error
+      ) => {
+        console.error(
+          "Subscription reminder worker error",
+          {
+            message:
+              error.message,
+          }
+        );
+      }
+    );
+    
+    worker.on(
+      "stalled",
+    
+      (
+        jobId
+      ) => {
+        console.warn(
+          "Subscription reminder job stalled",
+          {
+            jobId,
+          }
+        );
+      }
+    );
+    
   worker.on(
     "failed",
     (
