@@ -41,6 +41,27 @@ import {
   
   return 0
   `;
+
+  function getLimitKey(
+    namespace:
+      string,
+  
+    subject:
+      string
+  ) {
+    const hash =
+      createHash(
+        "sha256"
+      )
+        .update(
+          subject
+        )
+        .digest(
+          "hex"
+        );
+  
+    return `valyou:limit:${namespace}:${hash}`;
+  }
   
   export async function consumeLimit(
     namespace:
@@ -64,17 +85,7 @@ import {
        * IP addresses or user IDs
        * directly into Redis keys.
        */
-      const hash =
-        createHash(
-          "sha256"
-        )
-          .update(
-            subject
-          )
-          .digest(
-            "hex"
-          );
-  
+      
       const retryMs =
         Number(
           await client.eval(
@@ -82,7 +93,10 @@ import {
   
             1,
   
-            `valyou:limit:${namespace}:${hash}`,
+            getLimitKey(
+              namespace,
+              subject
+            ),
   
             limit,
   
@@ -183,5 +197,94 @@ import {
           error
         );
       }
+    };
+  }
+
+  export async function getLimitUsage(
+    namespace:
+      string,
+  
+    subject:
+      string,
+  
+    limit:
+      number
+  ) {
+    const client =
+      await requestRedis();
+  
+    const key =
+      getLimitKey(
+        namespace,
+        subject
+      );
+  
+    const [
+      rawCount,
+      ttlMs,
+    ] =
+      await Promise.all([
+        client.get(
+          key
+        ),
+  
+        client.pttl(
+          key
+        ),
+      ]);
+  
+    const used =
+      Math.max(
+        0,
+        Number(
+          rawCount ??
+          0
+        ) ||
+        0
+      );
+  
+    const remaining =
+      Math.max(
+        0,
+        limit -
+        used
+      );
+  
+    const percentage =
+      limit ===
+        0
+        ? 0
+        : Math.min(
+            100,
+            Number(
+              (
+                (
+                  used /
+                  limit
+                ) *
+                100
+              ).toFixed(
+                1
+              )
+            )
+          );
+  
+    return {
+      limit,
+  
+      used,
+  
+      remaining,
+  
+      percentage,
+  
+      resetInSeconds:
+        ttlMs >
+        0
+          ? Math.ceil(
+              ttlMs /
+              1000
+            )
+          : null,
     };
   }

@@ -11,6 +11,7 @@ import weeklyReportRoutes from "../modules/weekly-reports/weekly-report-settings
 import adminCustomerRoutes from "../modules/admin/customers/customer.routes.js";
 import adminSubscriptionRoutes from "../modules/admin/subscriptions/subscription.routes.js";
 import adminOverviewRoutes from "../modules/admin/overview/overview.routes.js";
+import adminOperationsRoutes from "../modules/admin/operations/operations.routes.js";
 import googleRoutes from "../modules/google/google.routes.js";
 import accountRequestRoutes from "../modules/account-requests/account-request.routes.js";
 import accountRoutes from "../modules/accounts/account.routes.js";
@@ -67,6 +68,11 @@ router.use(
 router.use(
   "/admin/overview",
   adminOverviewRoutes
+);
+
+router.use(
+  "/admin/operations",
+  adminOperationsRoutes
 );
 
 router.use(
